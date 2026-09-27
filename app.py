@@ -647,8 +647,9 @@ def ai_chat():
             genai.configure(api_key=GEMINI_API_KEY)
             gemini_model = genai.GenerativeModel('gemini-1.5-flash')
             
-            context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.
-"
+            context = """You are WasteZero AI, a specialized assistant for a hostel food-waste management app.
+You help students and administrators.
+You answer questions about food waste."""
             context += "You must use the following ACTUAL real-time data to answer data-related questions.
 "
             
