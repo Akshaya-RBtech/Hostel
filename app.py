@@ -647,29 +647,21 @@ def ai_chat():
             genai.configure(api_key=GEMINI_API_KEY)
             gemini_model = genai.GenerativeModel('gemini-1.5-flash')
             
-            context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.
-"
-            context += "You must use the following ACTUAL real-time data to answer data-related questions.
-"
+            context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.\\n"
+            context += "You must use the following ACTUAL real-time data to answer data-related questions.\\n"
             
             if user_role == 'admin':
                 logs_summary = [f"{l['date']}: {l['meal_type']} wasted {l['wastage_percent']}% (Cost loss: {l['total_loss']})" for l in consumption_logs[-10:]]
-                context += f"Last 10 Consumption Logs: {logs_summary}
-"
-                context += f"Menus: {menu_data[:5]}
-"
-                context += f"Feedback Summary: {[f['reason'] for f in feedbacks[:10]]}
-"
+                context += f"Last 10 Consumption Logs: {logs_summary}\\n"
+                context += f"Menus: {menu_data[:5]}\\n"
+                context += f"Feedback Summary: {[f['reason'] for f in feedbacks[:10]]}\\n"
             else:
-                context += f"Upcoming Menus: {menu_data[:5]}
-"
+                context += f"Upcoming Menus: {menu_data[:5]}\\n"
                 context += "You are talking to a student. Focus on giving them diet tips, menu info, and instructing them to vote."
                 if vote_stats:
-                    context += f"Current Vote Stats: {vote_stats[:3]}
-"
+                    context += f"Current Vote Stats: {vote_stats[:3]}\\n"
                     
-            context += "
-Do not invent statistics or attendance numbers. If you don't know, say so based on the data provided."
+            context += "\\nDo not invent statistics or attendance numbers. If you don't know, say so based on the data provided."
             
             # Use RAG to fetch local feedback data context
             if not rag_index.is_built:
@@ -677,17 +669,11 @@ Do not invent statistics or attendance numbers. If you don't know, say so based 
             
             rag_results = rag_index.retrieve(message, top_k=5)
             if rag_results:
-                context += "
-
-Related Historical Semantic Context (RAG):
-"
+                context += "\\n\\nRelated Historical Semantic Context (RAG):\\n"
                 for res in rag_results:
-                    context += f"- {res['text']} (Match: {round(res['score'], 2)})
-"
+                    context += f"- {res['text']} (Match: {round(res['score'], 2)})\\n"
             
-            prompt = f"System Context: {context}
-
-User Question: {message}"
+            prompt = f"System Context: {context}\\n\\nUser Question: {message}"
             gemini_resp = gemini_model.generate_content(prompt)
             response_text = gemini_resp.text
         except Exception as e:
