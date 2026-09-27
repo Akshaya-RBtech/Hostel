@@ -647,16 +647,8 @@ def ai_chat():
             genai.configure(api_key=GEMINI_API_KEY)
             gemini_model = genai.GenerativeModel('gemini-1.5-flash')
             
-<<<<<<< HEAD
             context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.\\n"
             context += "You must use the following ACTUAL real-time data to answer data-related questions.\\n"
-=======
-            context = """You are WasteZero AI, a specialized assistant for a hostel food-waste management app.
-You help students and administrators.
-You answer questions about food waste."""
-            context += "You must use the following ACTUAL real-time data to answer data-related questions.
-"
->>>>>>> 1ee7d427f28bc230cbc99d961ca39f7071b7bd70
             
             if user_role == 'admin':
                 logs_summary = [f"{l['date']}: {l['meal_type']} wasted {l['wastage_percent']}% (Cost loss: {l['total_loss']})" for l in consumption_logs[-10:]]
