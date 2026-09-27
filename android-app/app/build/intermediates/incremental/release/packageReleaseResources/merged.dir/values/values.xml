@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_cyan">#22d3ee</color>
+    <color name="bg_dark">#030712</color>
+    <color name="card_bg">#0f172a</color>
+    <color name="indigo_dark">#4338ca</color>
+    <color name="indigo_primary">#6366f1</color>
+    <string name="app_name">WasteZero</string>
+    <style name="Theme.WasteZero" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/indigo_primary</item>
+        <item name="colorPrimaryVariant">@color/indigo_dark</item>
+        <item name="colorSecondary">@color/accent_cyan</item>
+        <item name="android:statusBarColor">#070b13</item>
+        <item name="android:navigationBarColor">#030712</item>
+    </style>
+</resources>

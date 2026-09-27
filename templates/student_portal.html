@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="fade-in px-4 py-6">
+    <div class="mb-12">
+        <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">Active Menu Planning</h1>
+        <p class="text-slate-400 text-base sm:text-lg">Cast your vote for upcoming sessions to help us scale kitchen preparation and prevent wastage.</p>
+    </div>
+
+    {% if not menus %}
+    <div class="text-center py-20 bg-slate-900/35 rounded-3xl border-2 border-dashed border-slate-800/80 backdrop-blur-md">
+        <div class="w-16 h-16 bg-slate-950 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-650">
+            <i class="fas fa-calendar-times text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white">No menus published yet</h3>
+        <p class="text-slate-450 mt-1 text-sm">Check back shortly for tomorrow's scheduled meals.</p>
+    </div>
+    {% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for menu in menus %}
+        <div class="border border-slate-800 rounded-3xl p-6 sm:p-8 bg-slate-900/40 shadow-xl backdrop-blur-md hover:border-slate-700/85 transition-all relative overflow-hidden flex flex-col justify-between">
+            {% if menu.id in voted_ids %}
+            <div class="absolute top-0 right-0 bg-emerald-500 text-white px-4 py-1.5 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider">
+                <i class="fas fa-check mr-1"></i> Responses Logged
+            </div>
+            {% endif %}
+            
+            <div>
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-wider">{{ menu.meal_type }}</span>
+                        <h3 class="text-2xl font-bold text-white mt-3">{{ menu.date }}</h3>
+                    </div>
+                    <div class="text-indigo-500/30 p-2">
+                        <i class="fas fa-utensils text-2xl"></i>
+                    </div>
+                </div>
+                
+                <div class="mb-8">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Scheduled Dishes</span>
+                    <p class="text-base text-slate-200 font-semibold leading-relaxed mt-2">{{ menu.items }}</p>
+                    {% if menu.event_type != 'Normal' %}
+                    <span class="inline-block mt-3 px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded border border-amber-500/20">
+                        <i class="fas fa-star mr-1"></i> {{ menu.event_type }} Special
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                {% if menu.id not in voted_ids %}
+                <form action="{{ url_for('vote') }}" method="POST" id="vote-form-{{ menu.id }}">
+                    <input type="hidden" name="menu_id" value="{{ menu.id }}">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button type="submit" name="choice" value="Yes" class="flex-1 py-3 bg-indigo-650 hover:bg-indigo-600 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-600/15 duration-200">
+                            <i class="fas fa-thumbs-up mr-2"></i> Yes, eating
+                        </button>
+                        <button type="button" onclick="showReason('{{ menu.id }}')" class="flex-1 py-3 bg-slate-800 hover:bg-red-500/10 hover:text-red-400 text-slate-300 font-bold rounded-xl transition-all duration-200">
+                            <i class="fas fa-thumbs-down mr-2"></i> Will Skip
+                        </button>
+                    </div>
+
+                    <!-- Hidden Reason Field -->
+                    <div id="reason-box-{{ menu.id }}" class="hidden mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label class="block text-slate-400 text-xs font-bold mb-2 uppercase tracking-wide">Tell us why (required)</label>
+                        <textarea name="reason" id="reason-input-{{ menu.id }}" class="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:border-red-500/40 focus:ring-1 focus:ring-red-500/20 transition-all placeholder-slate-650" placeholder="e.g. Allergies, eating out, leaving campus..."></textarea>
+                        <button type="submit" name="choice" value="No" class="w-full mt-2.5 py-2.5 bg-red-650 text-white font-bold rounded-xl hover:bg-red-600 transition-all shadow-md shadow-red-650/15 duration-200">Submit Cancellation</button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-center">
+                    <p class="text-emerald-400 font-semibold text-xs"><i class="fas fa-circle-check mr-1"></i> Kitchen notified of your Choice.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Floating AI Chatbot Button & Drawer -->
+<div class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleStudentChat()" class="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 hover:shadow-indigo-500/20 active:scale-95 transition-all focus:outline-none relative">
+        <i class="fas fa-robot animate-bounce"></i>
+        <span class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
+    </button>
+</div>
+
+<!-- Student AI Chat Drawer -->
+<div id="student-chat-drawer" class="fixed inset-y-0 right-0 w-full sm:w-96 bg-slate-900 border-l border-slate-850 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Header -->
+    <div class="p-4 bg-gradient-to-r from-indigo-900 to-purple-900 text-white flex justify-between items-center shadow border-b border-indigo-800/10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-500/15 border border-indigo-400/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-xl text-indigo-300"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-sm">WasteZero Assistant</h4>
+                <span class="text-[10px] text-emerald-405 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span> Live Support
+                </span>
+            </div>
+        </div>
+        <button onclick="toggleStudentChat()" class="text-slate-400 hover:text-white text-xl p-1.5 transition-colors">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Quick Prompt Chips -->
+    <div class="p-3 bg-slate-950 border-b border-slate-850 flex gap-2 overflow-x-auto text-[10px] select-none scrollbar-thin">
+        <button onclick="sendQuickPrompt('What is for today?')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">🍽️ Today's Menu</button>
+        <button onclick="sendQuickPrompt('What is for tomorrow?')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">📅 Tomorrow</button>
+        <button onclick="sendQuickPrompt('How many students are eating today?')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">👥 Who's Eating?</button>
+        <button onclick="sendQuickPrompt('Give me diet tips')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">💡 Diet Tips</button>
+        <button onclick="sendQuickPrompt('How to skip a meal')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">🗳️ How to Vote</button>
+        <button onclick="sendQuickPrompt('What is WasteZero?')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">❓ About</button>
+    </div>
+
+    <!-- Message Area -->
+    <div id="student-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-950 text-xs scrollbar-thin flex flex-col">
+        <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-850 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="bg-slate-900 p-3 rounded-2xl border border-slate-850 shadow-sm max-w-[80%] text-slate-300 leading-relaxed">
+                👋 Hi! I'm your <strong>WasteZero Hostel Assistant</strong>. Ask me about today's menu, tomorrow's meals, vote stats, diet tips, or how to skip a meal!
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="p-3.5 bg-slate-900 border-t border-slate-850 flex gap-2 items-center">
+        <input type="text" id="student-chat-input" placeholder="Ask about menu, meal times..." onkeypress="handleKeyPress(event)" class="flex-1 px-4 py-2.5 rounded-full bg-slate-950 border border-slate-850 text-white text-xs outline-none focus:border-indigo-500Focus focus:ring-1 focus:ring-indigo-500/10 placeholder-slate-600">
+        <button onclick="sendStudentMessage()" class="w-9 h-9 bg-indigo-650 hover:bg-indigo-600 text-white rounded-full flex items-center justify-center hover:opacity-90 active:scale-95 transition-all flex-shrink-0 shadow-md shadow-indigo-650/15">
+            <i class="fas fa-paper-plane text-xs"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    function showReason(id) {
+        const box = document.getElementById('reason-box-' + id);
+        const input = document.getElementById('reason-input-' + id);
+        box.classList.toggle('hidden');
+        if (!box.classList.contains('hidden')) {
+            input.setAttribute('required', 'true');
+            input.focus();
+        } else {
+            input.removeAttribute('required');
+        }
+    }
+
+    function toggleStudentChat() {
+        const drawer = document.getElementById('student-chat-drawer');
+        drawer.classList.toggle('translate-x-full');
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') sendStudentMessage();
+    }
+
+    function sendQuickPrompt(promptText) {
+        document.getElementById('student-chat-input').value = promptText;
+        sendStudentMessage();
+    }
+
+    let studentSessionId = 'student_' + Math.random().toString(36).substr(2, 9);
+
+    async function sendStudentMessage() {
+        const input = document.getElementById('student-chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const messagesContainer = document.getElementById('student-chat-messages');
+
+        // Add user message
+        messagesContainer.innerHTML += `
+            <div class="flex justify-end gap-2.5">
+                <div class="bg-indigo-600 text-white p-3 rounded-2xl max-w-[80%] text-xs shadow-md border border-indigo-550/20">
+                    ${text}
+                </div>
+            </div>
+        `;
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Add typing indicator
+        const typingId = 'typing-' + Date.now();
+        messagesContainer.innerHTML += `
+            <div id="${typingId}" class="flex items-start gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-850 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0 animate-pulse">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-850 text-slate-500 italic">
+                    AI is pondering...
+                </div>
+            </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        try {
+            const res = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, session_id: studentSessionId })
+            });
+            const data = await res.json();
+
+            document.getElementById(typingId)?.remove();
+
+            const parsedContent = typeof marked !== 'undefined' ? marked.parse(data.response) : data.response;
+
+            messagesContainer.innerHTML += `
+                <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-850 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-850 shadow-sm max-w-[80%] text-slate-300 leading-relaxed markdown-body">
+                        ${parsedContent}
+                    </div>
+                </div>
+            `;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (err) {
+            document.getElementById(typingId)?.remove();
+            messagesContainer.innerHTML += `
+                <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-850 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-red-950/20 text-red-400 p-3 rounded-2xl border border-red-900/20 text-xs">
+                        An error occurred while connecting. Let's try again shortly.
+                    </div>
+                </div>
+            `;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+R_DEF: Internal format may change without notice
+local
+color accent_cyan
+color bg_dark
+color card_bg
+color indigo_dark
+color indigo_primary
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id btnRetry
+id errorLayout
+id progressBar
+id swipeRefreshLayout
+id tvErrorText
+id webView
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Theme.WasteZero
