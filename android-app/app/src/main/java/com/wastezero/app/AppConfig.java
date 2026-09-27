@@ -12,7 +12,7 @@ public class AppConfig {
     public static final String LOCAL_DEVELOPMENT_URL = "http://192.168.1.69:5000";
     
     // The public server URL for production (Deployment required)
-    public static final String PRODUCTION_URL = "https://minii.onrender.com"; // SUCCESSFUL PRODUCTION BACKEND
+    public static final String PRODUCTION_URL = "https://mini-project-umnj.onrender.com"; // SUCCESSFUL PRODUCTION BACKEND
     
     public static final String BACKEND_URL = IS_DEVELOPMENT_MODE ? LOCAL_DEVELOPMENT_URL : PRODUCTION_URL;
 }
