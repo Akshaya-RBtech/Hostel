@@ -2,68 +2,68 @@
 
 {% block content %}
 <div class="flex items-center justify-center min-h-[65vh] fade-in px-4 py-8">
-    <div class="w-full max-w-md p-8 bg-slate-900/55 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-md">
-        <h2 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Create Account</h2>
-        <p class="text-sm text-slate-400 mb-8">{{ type }} Registration &mdash; Join WasteZero</p>
+    <div class="w-full max-w-md p-8 bg-[var(--card-bg)] border border-[var(--border)] rounded-3xl shadow-2xl backdrop-blur-md">
+        <h2 class="text-3xl font-extrabold text-[var(--text-primary)] mb-2 tracking-tight">Create Account</h2>
+        <p class="text-sm text-[var(--text-secondary)] mb-8">{{ type }} Registration &mdash; Join WasteZero</p>
         
         <form id="register-form">
             <div id="error-msg" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold text-center"></div>
 
             {% if type == 'Admin' %}
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Setup Secret Key</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Setup Secret Key</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-key text-sm"></i></span>
-                    <input type="password" id="admin_secret" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" placeholder="Required for first admin setup" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-key text-sm"></i></span>
+                    <input type="password" id="admin_secret" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="Required for first admin setup" required>
                 </div>
             </div>
             {% else %}
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Student ID</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Student ID</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-id-card text-sm"></i></span>
-                    <input type="text" id="student_id" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" placeholder="e.g. ST12345" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-id-card text-sm"></i></span>
+                    <input type="text" id="student_id" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="e.g. ST12345" required>
                 </div>
             </div>
             {% endif %}
             
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Full Name</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-user text-sm"></i></span>
-                    <input type="text" id="full_name" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-user text-sm"></i></span>
+                    <input type="text" id="full_name" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" required>
                 </div>
             </div>
             
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Email Address</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-envelope text-sm"></i></span>
-                    <input type="email" id="email" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" placeholder="you@university.edu" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-envelope text-sm"></i></span>
+                    <input type="email" id="email" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="you@university.edu" required>
                 </div>
             </div>
             
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Username</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Username</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-at text-sm"></i></span>
-                    <input type="text" id="username" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-at text-sm"></i></span>
+                    <input type="text" id="username" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" required>
                 </div>
             </div>
 
             <div class="mb-5">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Password</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-lock text-sm"></i></span>
-                    <input type="password" id="password" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" placeholder="••••••••" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-lock text-sm"></i></span>
+                    <input type="password" id="password" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="••••••••" required>
                 </div>
             </div>
             
             <div class="mb-8">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Confirm Password</label>
+                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Confirm Password</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"><i class="fas fa-lock text-sm"></i></span>
-                    <input type="password" id="confirm" class="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-slate-600" placeholder="••••••••" required>
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-lock text-sm"></i></span>
+                    <input type="password" id="confirm" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="••••••••" required>
                 </div>
             </div>
             
@@ -72,7 +72,7 @@
             </button>
         </form>
         
-        <p class="mt-8 text-center text-xs text-slate-500">
+        <p class="mt-8 text-center text-xs text-[var(--text-secondary)]">
             Already have an account? 
             <a href="{{ url_for('login') if type == 'Admin' else url_for('student_login') }}" class="text-indigo-400 hover:text-indigo-300 font-bold ml-1">Sign in</a>
         </p>
@@ -100,21 +100,14 @@
         const role = "{{ type }}";
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const confirm = document.getElementById('confirm').value;
-        const full_name = document.getElementById('full_name').value;
-        const username = document.getElementById('username').value;
-        
-        let student_id = null;
-        let admin_secret = null;
-
-        if(role === 'Student') {
-            student_id = document.getElementById('student_id').value;
-        } else {
-            admin_secret = document.getElementById('admin_secret').value;
-        }
-
         const errorDiv = document.getElementById('error-msg');
         const btn = document.getElementById('submit-btn');
+
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
+            errorDiv.innerText = "Firebase Error: API Key is missing. Add FIREBASE_API_KEY to your .env file.";
+            errorDiv.classList.remove('hidden');
+            return;
+        }
 
         if (password !== confirm) {
             errorDiv.innerText = "Passwords do not match.";

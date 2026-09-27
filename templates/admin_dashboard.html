@@ -242,16 +242,16 @@
                 </div>
                 <div class="card-body">
                     <div id="eval-result" style="display:none;" class="grid grid-cols-3 gap-4 text-center mt-2">
-                        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">MAE</div>
+                        <div class="p-3 bg-\[var(--card-bg)]/50 rounded-xl border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--text-secondary)] font-bold uppercase mb-1">MAE</div>
                             <div id="eval-mae" class="text-xl font-bold text-white">0</div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">RMSE</div>
+                        <div class="p-3 bg-\[var(--card-bg)]/50 rounded-xl border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--text-secondary)] font-bold uppercase mb-1">RMSE</div>
                             <div id="eval-rmse" class="text-xl font-bold text-white">0</div>
                         </div>
-                        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">Samples</div>
+                        <div class="p-3 bg-\[var(--card-bg)]/50 rounded-xl border border-[var(--border)]">
+                            <div class="text-[10px] text-[var(--text-secondary)] font-bold uppercase mb-1">Samples</div>
                             <div id="eval-samples" class="text-xl font-bold text-white">0</div>
                         </div>
                     </div>
@@ -1046,10 +1046,10 @@
         const typingId = 'typing-drawer-' + Date.now();
         messagesContainer.innerHTML += `
             <div id="${typingId}" class="flex items-start gap-2.5">
-                <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0 animate-pulse">
+                <div class="w-8 h-8 rounded-full bg-\[var(--card-bg)] border border-[var(--border)] text-indigo-400 flex items-center justify-center text-xs flex-shrink-0 animate-pulse">
                     <i class="fas fa-brain"></i>
                 </div>
-                <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-slate-500 italic">
+                <div class="bg-\[var(--card-bg)]/60 p-3 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] italic">
                     Agent is thinking...
                 </div>
             </div>
@@ -1070,10 +1070,10 @@
 
             messagesContainer.innerHTML += `
                 <div class="flex items-start gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-indigo-455 flex items-center justify-center text-xs flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-\[var(--card-bg)] border border-[var(--border)] text-indigo-455 flex items-center justify-center text-xs flex-shrink-0">
                         <i class="fas fa-brain"></i>
                     </div>
-                    <div class="bg-slate-920 p-3 rounded-2xl border border-slate-800 shadow-sm max-w-[90%] text-slate-300 leading-relaxed markdown-body">
+                    <div class="bg-slate-920 p-3 rounded-2xl border border-[var(--border)] shadow-sm max-w-[90%] text-slate-300 leading-relaxed markdown-body">
                         ${parsedContent}
                     </div>
                 </div>
@@ -1083,7 +1083,7 @@
             document.getElementById(typingId)?.remove();
             messagesContainer.innerHTML += `
                 <div class="flex items-start gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-\[var(--card-bg)] border border-[var(--border)] text-indigo-400 flex items-center justify-center text-xs flex-shrink-0">
                         <i class="fas fa-brain"></i>
                     </div>
                     <div class="bg-red-950/20 text-red-400 p-3 rounded-2xl border border-red-900/20 text-xs">
@@ -1104,9 +1104,9 @@
 </div>
 
 <!-- Admin AI Chat Drawer -->
-<div id="admin-chat-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[#0b0f19] border-l border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+<div id="admin-chat-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[#0b0f19] border-l border-[var(--border)] shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
     <!-- Header -->
-    <div class="p-4 bg-gradient-to-r from-[#0f172a] to-[#1e1b4b] text-white flex justify-between items-center shadow border-b border-slate-800">
+    <div class="p-4 bg-gradient-to-r from-[#0f172a] to-[#1e1b4b] text-white flex justify-between items-center shadow border-b border-[var(--border)]">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-500/15 border border-indigo-400/20 rounded-full flex items-center justify-center">
                 <i class="fas fa-brain text-xl text-indigo-400"></i>
@@ -1118,34 +1118,34 @@
                 </span>
             </div>
         </div>
-        <button onclick="toggleAdminChat()" class="text-slate-400 hover:text-white text-xl p-1.5 transition-colors">
+        <button onclick="toggleAdminChat()" class="text-[var(--text-secondary)] hover:text-white text-xl p-1.5 transition-colors">
             <i class="fas fa-times text-sm"></i>
         </button>
     </div>
 
     <!-- Quick Prompt Chips -->
-    <div class="p-3 bg-[#070b13] border-b border-slate-800 flex gap-2 overflow-x-auto text-[10px] select-none scrollbar-thin">
-        <button onclick="sendDrawerPrompt('What\'s on the menu for tomorrow?')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">🍽️ Tomorrow's Menu</button>
-        <button onclick="sendDrawerPrompt('Generate weekly report')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-700">📋 Weekly Report</button>
-        <button onclick="sendDrawerPrompt('Predict future waste')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-800">🔮 Forecast</button>
-        <button onclick="sendDrawerPrompt('Top student complaints')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-slate-800">📝 Complaints</button>
+    <div class="p-3 bg-[#070b13] border-b border-[var(--border)] flex gap-2 overflow-x-auto text-[10px] select-none scrollbar-thin">
+        <button onclick="sendDrawerPrompt('What\'s on the menu for tomorrow?')" class="px-3 py-1.5 bg-\[var(--card-bg)] border border-[var(--border)] rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-[var(--border)]">🍽️ Tomorrow's Menu</button>
+        <button onclick="sendDrawerPrompt('Generate weekly report')" class="px-3 py-1.5 bg-\[var(--card-bg)] border border-[var(--border)] rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-[var(--border)]">📋 Weekly Report</button>
+        <button onclick="sendDrawerPrompt('Predict future waste')" class="px-3 py-1.5 bg-\[var(--card-bg)] border border-[var(--border)] rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-[var(--border)]">🔮 Forecast</button>
+        <button onclick="sendDrawerPrompt('Top student complaints')" class="px-3 py-1.5 bg-\[var(--card-bg)] border border-[var(--border)] rounded-full text-indigo-350 font-bold whitespace-nowrap hover:bg-slate-850 hover:border-[var(--border)]">📝 Complaints</button>
     </div>
 
     <!-- Message Area -->
     <div id="drawer-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-[#070b13] text-xs scrollbar-thin flex flex-col">
         <div class="flex items-start gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-indigo-400 flex items-center justify-center text-xs flex-shrink-0 animate-pulse">
+            <div class="w-8 h-8 rounded-full bg-\[var(--card-bg)] border border-[var(--border)] text-indigo-400 flex items-center justify-center text-xs flex-shrink-0 animate-pulse">
                 <i class="fas fa-brain"></i>
             </div>
-            <div class="bg-[#0f172a] p-3 rounded-2xl border border-slate-800 shadow-sm max-w-[90%] text-slate-300 leading-relaxed">
+            <div class="bg-[#0f172a] p-3 rounded-2xl border border-[var(--border)] shadow-sm max-w-[90%] text-slate-300 leading-relaxed">
                 Hello Admin! 👋 I am the **WasteZero Agentic AI Engine**. Ask me questions about consumption logs, tomorrow's menu, predictive forecasting, or generate executive reports.
             </div>
         </div>
     </div>
 
     <!-- Input Bar -->
-    <div class="p-3.5 bg-[#0f172a] border-t border-slate-800 flex gap-2 items-center">
-        <input type="text" id="drawer-chat-input" placeholder="Ask about menu, reports, average waste..." onkeypress="handleDrawerKeyPress(event)" class="flex-1 px-4 py-2.5 rounded-full bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/10 placeholder-slate-650">
+    <div class="p-3.5 bg-[#0f172a] border-t border-[var(--border)] flex gap-2 items-center">
+        <input type="text" id="drawer-chat-input" placeholder="Ask about menu, reports, average waste..." onkeypress="handleDrawerKeyPress(event)" class="flex-1 px-4 py-2.5 rounded-full bg-[var(--body-bg)] border border-[var(--border)] text-white text-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/10 placeholder-slate-650">
         <button onclick="sendDrawerMessage()" class="w-9 h-9 bg-indigo-650 hover:bg-indigo-600 text-white rounded-full flex items-center justify-center hover:opacity-90 active:scale-95 transition-all flex-shrink-0 shadow-md shadow-indigo-650/15">
             <i class="fas fa-paper-plane text-xs"></i>
         </button>
