@@ -86,6 +86,13 @@
     async function initFirebaseAuth() {
         try {
             const res = await fetch('/api/firebase-config');
+            if (!res.ok) {
+                console.warn('Backend returned non-200 for config endpoint');
+            }
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Server returned an invalid HTML/Non-JSON response for configuration.");
+            }
             const config = await res.json();
             if (!config.apiKey) {
                 showLoginError('Firebase is not configured. Contact the administrator.');
@@ -146,6 +153,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken: idToken, role: LOGIN_ROLE })
             });
+
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                // If it isn't JSON, throw an error, preventing JSON parse crash
+                throw new Error("Server returned HTML instead of JSON. The backend authentication route may have crashed.");
+            }
 
             const data = await res.json();
 
