@@ -203,11 +203,31 @@
         document.getElementById('reg-error').style.display = 'none';
 
         try {
-            // Create Firebase account
-            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-
-            // Update display name
-            await userCredential.user.updateProfile({ displayName: fullName });
+            // Attempt to create Firebase account
+            let userCredential;
+            let existingAccount = false;
+            
+            try {
+                userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                // Update display name for new accounts
+                await userCredential.user.updateProfile({ displayName: fullName });
+            } catch (createError) {
+                if (createError.code === 'auth/email-already-in-use') {
+                    existingAccount = true;
+                    // Account exists in Firebase, try to sign in to get the token for syncing
+                    try {
+                        userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    } catch (signInError) {
+                        if (signInError.code === 'auth/wrong-password') {
+                            showRegError('This email is already registered. Please enter the correct password to complete setup, or sign in.');
+                            return;
+                        }
+                        throw signInError; // Re-throw if it's not a simple wrong-password issue
+                    }
+                } else {
+                    throw createError; // Re-throw other creation errors
+                }
+            }
 
             const idToken = await userCredential.user.getIdToken();
 
@@ -216,7 +236,8 @@
                 idToken: idToken,
                 role: REG_ROLE,
                 full_name: fullName,
-                username: username
+                username: username,
+                is_sync: existingAccount // Flag to tell backend this is an existing Firebase account sync
             };
 
             if (REG_ROLE === 'student') {
@@ -252,21 +273,22 @@
             const data = await res.json();
 
             if (data.success) {
-                showRegSuccess('Account created successfully! Redirecting to login...');
+                showRegSuccess('Account setup successfully! Redirecting to login...');
                 setTimeout(() => {
                     window.location.href = data.redirect;
                 }, 1500);
             } else {
                 showRegError(data.error || 'Registration failed. Please try again.');
-                // Delete the Firebase account if backend registration failed
-                try {
-                    await firebase.auth().currentUser?.delete();
-                } catch (e) { /* ignore */ }
+                // Only delete the Firebase account if we created it during this session
+                if (!existingAccount) {
+                    try {
+                        await firebase.auth().currentUser?.delete();
+                    } catch (e) { /* ignore */ }
+                }
             }
         } catch (error) {
             console.error('Registration error:', error);
             const errorMessages = {
-                'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
                 'auth/invalid-email': 'Invalid email address.',
                 'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
                 'auth/network-request-failed': 'Network error. Check your connection.'

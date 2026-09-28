@@ -319,11 +319,19 @@ def api_auth_register():
         if not ADMIN_SETUP_SECRET or secret != ADMIN_SETUP_SECRET:
             return jsonify({'error': 'Invalid setup secret.'}), 403
             
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            if existing_user.role == 'admin':
+                return jsonify({'error': 'Email already registered as admin. Try logging in.'}), 400
+            else:
+                # Upgrade existing non-admin to admin since they have the setup secret
+                existing_user.role = 'admin'
+                existing_user.full_name = full_name
+                db.session.commit()
+                return jsonify({'success': True, 'redirect': url_for('login')})
+                
         if User.query.filter_by(username=username).first():
             return jsonify({'error': 'Username already exists.'}), 400
-        
-        if User.query.filter_by(email=email).first():
-            return jsonify({'error': 'Email already registered.'}), 400
             
         user = User(username=username, email=email, full_name=full_name, role='admin')
         db.session.add(user)
@@ -344,11 +352,12 @@ def api_auth_register():
                 db.session.commit()
                 return jsonify({'success': True, 'redirect': url_for('student_login')})
                 
+        existing_user_by_email = User.query.filter_by(email=email).first() if email else None
+        if existing_user_by_email:
+             return jsonify({'error': 'Email already registered. Try signing in instead.'}), 400
+                
         if User.query.filter_by(username=username).first():
             return jsonify({'error': 'Username already exists.'}), 400
-        
-        if email and User.query.filter_by(email=email).first():
-            return jsonify({'error': 'Email already registered.'}), 400
             
         user = User(username=username, full_name=full_name, email=email, student_id=student_id, role='student')
         db.session.add(user)
