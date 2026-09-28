@@ -1,69 +1,92 @@
+"""
+Firebase Authentication Service for WasteZero
+=============================================
+Handles Firebase initialization and ID token verification.
+Uses Firebase REST API verification (no Admin SDK dependency required).
+Falls back gracefully when Firebase credentials are not configured.
+"""
+
 import os
 import json
 import requests
-import firebase_admin
-from firebase_admin import credentials, auth
 
-firebase_app = None
+# Firebase configuration from environment
+FIREBASE_API_KEY = os.environ.get('FIREBASE_API_KEY', '')
+FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', '')
+
+# Google's public key endpoint for verifying Firebase ID tokens
+GOOGLE_CERTS_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+FIREBASE_VERIFY_URL = 'https://identitytoolkit.googleapis.com/v1/accounts:lookup'
+
 
 def init_firebase():
-    global firebase_app
-    if firebase_app:
-        return firebase_app
-    
-    cred_json = os.environ.get('FIREBASE_CREDENTIALS')
-    
-    if cred_json:
-        try:
-            cred_dict = json.loads(cred_json)
-            cred = credentials.Certificate(cred_dict)
-            firebase_app = firebase_admin.initialize_app(cred)
-            print("Firebase Admin SDK initialized successfully.")
-        except Exception as e:
-            print(f"ERROR initializing Firebase: {e}")
+    """Initialize Firebase configuration. Logs status."""
+    if FIREBASE_API_KEY and FIREBASE_PROJECT_ID:
+        print(f"[Firebase] Configured for project: {FIREBASE_PROJECT_ID}")
     else:
-        print("WARNING: FIREBASE_CREDENTIALS env var not set. Firebase verification will use REST API fallback.")
-    
-    return firebase_app
+        print("[Firebase] WARNING: Firebase API key or project ID not set. Auth will be limited.")
+
 
 def verify_id_token(id_token):
-    """Verifies a Firebase ID token and returns the decoded claims."""
-    # MOCK MODE Fallback
-    if id_token and id_token.startswith('mock_token_'):
-        email = id_token.replace('mock_token_', '')
-        return {'email': email, 'uid': 'mock_uid_' + email}
-
-    # Attempt Admin SDK First
-    if firebase_app:
-        try:
-            decoded_token = auth.verify_id_token(id_token, check_revoked=True)
-            return decoded_token
-        except Exception as e:
-            print(f"Firebase token verification failed (Admin): {e}")
-            return None
-
-    # Fallback to Identity Toolkit REST API
-    api_key = os.environ.get('FIREBASE_API_KEY')
-    if not api_key:
-        print("Both FIREBASE_CREDENTIALS and FIREBASE_API_KEY are missing.")
+    """
+    Verify a Firebase ID token using Google's Identity Toolkit REST API.
+    Returns the user claims dict if valid, or None if invalid/missing config.
+    """
+    if not id_token:
         return None
-
+    
+    if not FIREBASE_API_KEY:
+        print("[Firebase] Cannot verify token: FIREBASE_API_KEY not configured.")
+        return None
+    
     try:
-        url = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={api_key}"
-        resp = requests.post(url, json={"idToken": id_token})
-        data = resp.json()
-
-        if "users" in data and len(data["users"]) > 0:
-            user_data = data["users"][0]
-            # Map identity provider fields to match Admin SDK shape
-            return {
-                'email': user_data.get('email'),
-                'uid': user_data.get('localId'),
-                'email_verified': user_data.get('emailVerified')
-            }
+        # Use Firebase's REST API to look up account info by idToken
+        response = requests.post(
+            f'{FIREBASE_VERIFY_URL}?key={FIREBASE_API_KEY}',
+            json={'idToken': id_token},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            users = data.get('users', [])
+            if users:
+                user = users[0]
+                return {
+                    'uid': user.get('localId', ''),
+                    'email': user.get('email', ''),
+                    'email_verified': user.get('emailVerified', False),
+                    'display_name': user.get('displayName', ''),
+                    'provider_id': user.get('providerUserInfo', [{}])[0].get('providerId', ''),
+                }
         else:
-            print(f"Firebase token verification failed (REST): {data}")
+            error_data = response.json()
+            error_msg = error_data.get('error', {}).get('message', 'Unknown error')
+            print(f"[Firebase] Token verification failed: {error_msg}")
             return None
-    except Exception as e:
-        print(f"Firebase REST token verification exception: {e}")
+            
+    except requests.exceptions.Timeout:
+        print("[Firebase] Token verification timed out.")
         return None
+    except requests.exceptions.RequestException as e:
+        print(f"[Firebase] Network error during token verification: {e}")
+        return None
+    except Exception as e:
+        print(f"[Firebase] Unexpected error during token verification: {e}")
+        return None
+
+
+def get_firebase_config():
+    """
+    Return Firebase client configuration for the frontend.
+    Only includes public configuration fields (safe to expose).
+    """
+    return {
+        'apiKey': FIREBASE_API_KEY,
+        'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN', ''),
+        'projectId': FIREBASE_PROJECT_ID,
+        'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET', ''),
+        'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID', ''),
+        'appId': os.environ.get('FIREBASE_APP_ID', ''),
+        'measurementId': os.environ.get('FIREBASE_MEASUREMENT_ID', ''),
+    }

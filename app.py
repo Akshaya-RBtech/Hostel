@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-ADMIN_SETUP_SECRET = os.environ.get("ADMIN_SETUP_SECRET")
+ADMIN_SETUP_SECRET = os.environ.get("ADMIN_SETUP_SECRET", "")
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -16,12 +16,13 @@ from ai_engine import WasteAnalyticsAI
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-from services.firebase_service import init_firebase, verify_id_token
+from services.firebase_service import init_firebase, verify_id_token, get_firebase_config
 from services.rag_service import rag_index
 
 init_firebase()
 
-app.config['SECRET_KEY'] = 'smart-hostel-secret-key'
+# ── Secure configuration ──
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'wastezero-dev-secret-change-in-prod')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hostel_waste.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -91,17 +92,47 @@ def get_vote_stats():
     return stats
 
 
+def safe_migrate_db():
+    """Safely add new columns to existing tables without losing data."""
+    import sqlite3
+    db_path = os.path.join(app.instance_path, 'hostel_waste.db')
+    if not os.path.exists(db_path):
+        return
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Check and add missing columns to User table
+    try:
+        cursor.execute("PRAGMA table_info(user)")
+        columns = [col[1] for col in cursor.fetchall()]
+        
+        if 'email' not in columns:
+            cursor.execute("ALTER TABLE user ADD COLUMN email VARCHAR(120)")
+            print("[Migration] Added 'email' column to User table.")
+        
+        if 'full_name' not in columns:
+            cursor.execute("ALTER TABLE user ADD COLUMN full_name VARCHAR(120)")
+            print("[Migration] Added 'full_name' column to User table.")
+        
+        conn.commit()
+    except Exception as e:
+        print(f"[Migration] Warning: {e}")
+    finally:
+        conn.close()
+
+
 def init_db():
     with app.app_context():
+        # Run safe migrations first
+        safe_migrate_db()
+        
         db.create_all()
         
-        # If FoodConsumption table is empty, do a clean seed of all tables for a populated dashboard
+        # If FoodConsumption table is empty, seed with sample data
         if FoodConsumption.query.count() == 0:
-            print("FoodConsumption table is empty. Recreating and seeding fresh mock dataset...")
-            db.drop_all()
-            db.create_all()
+            print("FoodConsumption table is empty. Seeding fresh dataset...")
             
-            # (Admin creation removed - use /admin/setup)
             import random
             from datetime import date, timedelta
             
@@ -116,8 +147,12 @@ def init_db():
                 User(username='David Black', student_id='ST007', role='student'),
                 User(username='Emma Watson', student_id='ST008', role='student'),
             ]
+            
+            # Only add students that don't exist yet
             for s in students:
-                db.session.add(s)
+                existing = User.query.filter_by(student_id=s.student_id).first()
+                if not existing:
+                    db.session.add(s)
             
             breakfast_options = [
                 ("Idli, Sambar, Coconut Chutney", "Normal"),
@@ -148,85 +183,85 @@ def init_db():
                 "Willing to eat outside with friends", "Too repetitive, served twice this week"
             ]
             
-            for d_idx in range(11):
-                cur_date = (start_date + timedelta(days=d_idx)).strftime('%Y-%m-%d')
-                
-                menu_trios = [
-                    ('Breakfast', breakfast_options[d_idx % len(breakfast_options)]),
-                    ('Lunch', lunch_options[d_idx % len(lunch_options)]),
-                    ('Dinner', dinner_options[d_idx % len(dinner_options)])
-                ]
-                
-                for meal_type, (items, event_type) in menu_trios:
-                    menu = MenuEntry(
-                        date=cur_date,
-                        meal_type=meal_type,
-                        items=items,
-                        event_type=event_type,
-                        published=True
-                    )
-                    db.session.add(menu)
-                    db.session.flush() # gets menu.id
+            # Seed: only if no menus exist
+            if MenuEntry.query.count() == 0:
+                for d_idx in range(11):
+                    cur_date = (start_date + timedelta(days=d_idx)).strftime('%Y-%m-%d')
                     
-                    yes_count = 0
-                    for student in students:
-                        choice_rand = random.random()
-                        choice = 'Yes' if choice_rand > 0.3 else 'No'
-                        reason = random.choice(negative_reasons) if choice == 'No' else None
-                        if choice == 'Yes':
-                            yes_count += 1
-                        
-                        vote = Vote(
-                            student_id=student.student_id,
-                            menu_id=menu.id,
-                            choice=choice,
-                            reason=reason
-                        )
-                        db.session.add(vote)
+                    menu_trios = [
+                        ('Breakfast', breakfast_options[d_idx % len(breakfast_options)]),
+                        ('Lunch', lunch_options[d_idx % len(lunch_options)]),
+                        ('Dinner', dinner_options[d_idx % len(dinner_options)])
+                    ]
                     
-                    # Record actual consumption for past days (0 to 9)
-                    if d_idx < 10:
-                        guests = random.randint(0, 3)
-                        total_expected = yes_count + guests
-                        
-                        prep_multiplier = random.choice([1.0, 1.1, 1.15, 1.25, 0.95])
-                        prepared = round((total_expected * 15 * prep_multiplier), 1)
-                        
-                        consumption_ratio = random.uniform(0.70, 0.98)
-                        consumed = round(prepared * consumption_ratio, 1)
-                        
-                        wastage = round(prepared - consumed, 1)
-                        wastage_pct = round((wastage / prepared) * 100, 1)
-                        cost_val = 80.0
-                        loss = round(wastage * cost_val, 2)
-                        
-                        recs = []
-                        if wastage_pct > 20:
-                            recs.append(f"CRITICAL WASTE ALERT: Wastage is high at {wastage_pct}% ({wastage} kg).")
-                            recs.append(f"Action: Reduce future preparation of '{menu.items}' by at least {round(wastage*0.7, 1)} kg.")
-                        elif wastage_pct > 10:
-                            recs.append(f"MODERATE WASTE ALERT: Wastage is {wastage_pct}% ({wastage} kg).")
-                            recs.append(f"Action: Scale down preparation slightly by {round(wastage*0.5, 1)} kg.")
-                        else:
-                            recs.append(f"OPTIMAL UTILIZATION: Wastage is low at {wastage_pct}% ({wastage} kg).")
-                            recs.append("Action: Standardize this preparation quantity for future instances.")
-                        
-                        rec_text = " | ".join(recs)
-                        
-                        consumption = FoodConsumption(
-                            menu_id=menu.id,
-                            prepared_qty=prepared,
-                            consumed_qty=consumed,
-                            wastage_qty=wastage,
-                            wastage_percent=wastage_pct,
-                            cost_per_unit=cost_val,
-                            total_loss=loss,
-                            recommendations=rec_text
+                    for meal_type, (items, event_type) in menu_trios:
+                        menu = MenuEntry(
+                            date=cur_date,
+                            meal_type=meal_type,
+                            items=items,
+                            event_type=event_type,
+                            published=True
                         )
-                        db.session.add(consumption)
-            
-            db.session.commit()
-            print("Mock data seeded successfully: admin user and 10 days of consumption/votes.")
+                        db.session.add(menu)
+                        db.session.flush()
+                        
+                        all_students = User.query.filter_by(role='student').all()
+                        yes_count = 0
+                        for student in all_students:
+                            choice_rand = random.random()
+                            choice = 'Yes' if choice_rand > 0.3 else 'No'
+                            reason = random.choice(negative_reasons) if choice == 'No' else None
+                            if choice == 'Yes':
+                                yes_count += 1
+                            
+                            vote = Vote(
+                                student_id=student.student_id,
+                                menu_id=menu.id,
+                                choice=choice,
+                                reason=reason
+                            )
+                            db.session.add(vote)
+                        
+                        # Record actual consumption for past days
+                        if d_idx < 10:
+                            guests = random.randint(0, 3)
+                            total_expected = yes_count + guests
+                            
+                            prep_multiplier = random.choice([1.0, 1.1, 1.15, 1.25, 0.95])
+                            prepared = round((total_expected * 15 * prep_multiplier), 1)
+                            
+                            consumption_ratio = random.uniform(0.70, 0.98)
+                            consumed = round(prepared * consumption_ratio, 1)
+                            
+                            wastage = round(prepared - consumed, 1)
+                            wastage_pct = round((wastage / prepared) * 100, 1) if prepared > 0 else 0
+                            cost_val = 80.0
+                            loss = round(wastage * cost_val, 2)
+                            
+                            recs = []
+                            if wastage_pct > 20:
+                                recs.append(f"CRITICAL WASTE ALERT: Wastage is high at {wastage_pct}% ({wastage} kg).")
+                            elif wastage_pct > 10:
+                                recs.append(f"MODERATE WASTE ALERT: Wastage is {wastage_pct}% ({wastage} kg).")
+                            else:
+                                recs.append(f"OPTIMAL UTILIZATION: Wastage is low at {wastage_pct}% ({wastage} kg).")
+                            
+                            rec_text = " | ".join(recs)
+                            
+                            consumption = FoodConsumption(
+                                menu_id=menu.id,
+                                prepared_qty=prepared,
+                                consumed_qty=consumed,
+                                wastage_qty=wastage,
+                                wastage_percent=wastage_pct,
+                                cost_per_unit=cost_val,
+                                total_loss=loss,
+                                recommendations=rec_text
+                            )
+                            db.session.add(consumption)
+                
+                db.session.commit()
+                print("Sample data seeded successfully.")
         
         # Train predictor
         predictor.train()
@@ -257,6 +292,14 @@ def student_login():
     if request.method == 'GET':
         return render_template('login.html', type='Student')
 
+# ── Firebase Config Endpoint ──
+@app.route('/api/firebase-config')
+def firebase_config():
+    """Return Firebase client config for frontend initialization."""
+    config = get_firebase_config()
+    return jsonify(config)
+
+# ── Auth API ──
 @app.route('/api/auth/register', methods=['POST'])
 def api_auth_register():
     data = request.json
@@ -278,6 +321,9 @@ def api_auth_register():
             
         if User.query.filter_by(username=username).first():
             return jsonify({'error': 'Username already exists.'}), 400
+        
+        if User.query.filter_by(email=email).first():
+            return jsonify({'error': 'Email already registered.'}), 400
             
         user = User(username=username, email=email, full_name=full_name, role='admin')
         db.session.add(user)
@@ -300,6 +346,9 @@ def api_auth_register():
                 
         if User.query.filter_by(username=username).first():
             return jsonify({'error': 'Username already exists.'}), 400
+        
+        if email and User.query.filter_by(email=email).first():
+            return jsonify({'error': 'Email already registered.'}), 400
             
         user = User(username=username, full_name=full_name, email=email, student_id=student_id, role='student')
         db.session.add(user)
@@ -372,10 +421,7 @@ def admin_dashboard():
                         'text': r
                     })
     
-    # Get menus that do not have consumption logged yet, so they can be recorded
     unrecorded_menus = [m for m in menus if m.consumption is None]
-    
-    # AI Reports for the reports tab
     ai_reports = AIReport.query.order_by(AIReport.generated_at.desc()).limit(10).all()
     
     return render_template(
@@ -425,23 +471,19 @@ def record_consumption():
     no_votes_query = Vote.query.filter_by(menu_id=menu_id, choice='No').all()
     no_votes_reasons = [v.reason for v in no_votes_query if v.reason]
     
-    # Context-aware recommendation engine
     recs = []
     if wastage_percent > 25:
         recs.append(f"CRITICAL WASTE ALERT: Wastage is extremely high at {wastage_percent}% ({wastage_qty} kg).")
         if len(no_votes_query) > 0:
             recs.append(f"Reasons noted from {len(no_votes_query)} dissenting students: '{', '.join(no_votes_reasons[:3])}'.")
-            recs.append(f"Action: Reduce preparation of this dish by at least {round(wastage_qty * 0.8, 1)} kg next time, or revise flavor profile.")
         else:
-            recs.append(f"High wastage despite 'Yes' votes suggests sudden turnout drop. Action: Adjust base scale down by {round(wastage_qty * 0.5, 1)} kg.")
+            recs.append(f"High wastage despite 'Yes' votes. Action: Adjust base scale down.")
     elif wastage_percent > 10:
         recs.append(f"MODERATE WASTE ALERT: Wastage is {wastage_percent}% ({wastage_qty} kg).")
         if no_votes_reasons:
             recs.append(f"Student complaint: '{no_votes_reasons[0]}'.")
-        recs.append(f"Action: Scale back preparation by {round(wastage_qty * 0.4, 1)} kg for the next cycle.")
     else:
-        recs.append(f"OPTIMAL UTILIZATION: Wastage is super low at {wastage_percent}% ({wastage_qty} kg).")
-        recs.append("Action: Standardize current preparation metrics for future scheduling.")
+        recs.append(f"OPTIMAL UTILIZATION: Wastage is low at {wastage_percent}% ({wastage_qty} kg).")
         
     recommendations_text = " | ".join(recs)
     
@@ -511,7 +553,6 @@ def add_menu():
 @login_required
 def predict_quantity():
     data = request.json
-    # data: {day, meal, event, yes_count, guest_count}
     prediction = predictor.predict(
         data['day'], data['meal'], data['event'], 
         int(data['yes_count']), int(data['guest_count'])
@@ -533,14 +574,11 @@ def student_portal():
     if current_user.role != 'student':
         return redirect(url_for('index'))
     
-    # Show menus for tomorrow or today
     tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     today = datetime.now().strftime('%Y-%m-%d')
     
-    # Get published menus for today and tomorrow
     upcoming_menus = MenuEntry.query.filter(MenuEntry.date.in_([today, tomorrow])).all()
     
-    # Check what the student has already voted on
     my_votes = Vote.query.filter_by(student_id=current_user.student_id).all()
     voted_menu_ids = [v.menu_id for v in my_votes]
     
@@ -589,7 +627,6 @@ def get_analytics():
     if current_user.role != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
     
-    # Data for Chart.js: Skipped dishes (No votes) vs Meal types
     dish_analytics = db.session.query(MenuEntry.items, db.func.count(Vote.id)).\
         join(Vote).filter(Vote.choice == 'No').\
         group_by(MenuEntry.items).all()
@@ -597,10 +634,9 @@ def get_analytics():
     labels = [d[0] for d in dish_analytics]
     counts = [d[1] for d in dish_analytics]
     
-    # Student Feedback table data
     feedback = db.session.query(Vote.student_id, MenuEntry.items, Vote.reason, Vote.timestamp).\
         join(MenuEntry).filter(Vote.choice == 'No').all()
-    feedback_data = [{'student_id': f[0], 'dish': f[1], 'reason': f[2], 'time': f[3].strftime('%Y-%m-%d %H:%M')} for f in feedback]
+    feedback_data = [{'student_id': f[0], 'dish': f[1], 'reason': f[2], 'time': f[3].strftime('%Y-%m-%d %H:%M') if f[3] else ''} for f in feedback]
 
     return jsonify({
         'labels': labels,
@@ -610,15 +646,13 @@ def get_analytics():
 
 
 # ═══════════════════════════════════════════════
-# AGENTIC AI API ENDPOINTS (Phase 3 — New)
+# AGENTIC AI API ENDPOINTS
 # ═══════════════════════════════════════════════
 
 @app.route('/api/ai/chat', methods=['POST'])
 @login_required
 def ai_chat():
-    """AI Chatbot endpoint — processes natural language queries.
-    Uses Gemini LLM if API key is configured, with fallback to rule-based engine.
-    """
+    """AI Chatbot endpoint — uses Gemini LLM with RAG, fallback to rule-based."""
     data = request.json
     message = data.get('message', '')
     session_id = data.get('session_id', str(uuid.uuid4()))
@@ -647,33 +681,33 @@ def ai_chat():
             genai.configure(api_key=GEMINI_API_KEY)
             gemini_model = genai.GenerativeModel('gemini-1.5-flash')
             
-            context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.\\n"
-            context += "You must use the following ACTUAL real-time data to answer data-related questions.\\n"
+            context = "You are WasteZero AI, a specialized assistant for a hostel food-waste management app.\n"
+            context += "You must use the following ACTUAL real-time data to answer data-related questions.\n"
             
             if user_role == 'admin':
                 logs_summary = [f"{l['date']}: {l['meal_type']} wasted {l['wastage_percent']}% (Cost loss: {l['total_loss']})" for l in consumption_logs[-10:]]
-                context += f"Last 10 Consumption Logs: {logs_summary}\\n"
-                context += f"Menus: {menu_data[:5]}\\n"
-                context += f"Feedback Summary: {[f['reason'] for f in feedbacks[:10]]}\\n"
+                context += f"Last 10 Consumption Logs: {logs_summary}\n"
+                context += f"Menus: {menu_data[:5]}\n"
+                context += f"Feedback Summary: {[f['reason'] for f in feedbacks[:10]]}\n"
             else:
-                context += f"Upcoming Menus: {menu_data[:5]}\\n"
-                context += "You are talking to a student. Focus on giving them diet tips, menu info, and instructing them to vote."
+                context += f"Upcoming Menus: {menu_data[:5]}\n"
+                context += "You are talking to a student. Focus on menu info, diet tips, and voting."
                 if vote_stats:
-                    context += f"Current Vote Stats: {vote_stats[:3]}\\n"
+                    context += f"\nCurrent Vote Stats: {vote_stats[:3]}\n"
                     
-            context += "\\nDo not invent statistics or attendance numbers. If you don't know, say so based on the data provided."
+            context += "\nDo not invent statistics or attendance numbers. If you don't know, say so based on the data provided."
             
-            # Use RAG to fetch local feedback data context
+            # Use RAG to fetch relevant context
             if not rag_index.is_built:
                 rag_index.build_index(feedbacks)
             
             rag_results = rag_index.retrieve(message, top_k=5)
             if rag_results:
-                context += "\\n\\nRelated Historical Semantic Context (RAG):\\n"
+                context += "\n\nRelated Historical Semantic Context (RAG):\n"
                 for res in rag_results:
-                    context += f"- {res['text']} (Match: {round(res['score'], 2)})\\n"
+                    context += f"- {res['text']} (Match: {round(res['score'], 2)})\n"
             
-            prompt = f"System Context: {context}\\n\\nUser Question: {message}"
+            prompt = f"System Context: {context}\n\nUser Question: {message}"
             gemini_resp = gemini_model.generate_content(prompt)
             response_text = gemini_resp.text
         except Exception as e:
@@ -707,7 +741,7 @@ def ai_chat():
 @app.route('/api/ai/insights')
 @login_required
 def ai_insights():
-    """Get comprehensive AI insights — clusters, anomalies, forecasts."""
+    """Get comprehensive AI insights."""
     consumption_logs = get_consumption_dicts()
     feedbacks = get_feedback_dicts()
 
@@ -741,7 +775,6 @@ def generate_ai_report():
 
     report = ai_engine.generate_report(consumption_logs, feedbacks, period)
 
-    # Save to database
     db_report = AIReport(
         title=report['title'],
         period=report['period'],
@@ -826,7 +859,17 @@ def chat_history():
     })
 
 
+# ── Health Check ──
+@app.route('/api/health')
+def health_check():
+    return jsonify({
+        'status': 'ok',
+        'service': 'WasteZero API',
+        'timestamp': datetime.now().isoformat()
+    })
+
+
 if __name__ == '__main__':
     init_db()
-    # Host on 0.0.0.0 for cross-device access
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)

@@ -1,157 +1,269 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-[65vh] fade-in px-4 py-8">
-    <div class="w-full max-w-md p-8 bg-[var(--card-bg)] border border-[var(--border)] rounded-3xl shadow-2xl backdrop-blur-md">
-        <h2 class="text-3xl font-extrabold text-[var(--text-primary)] mb-2 tracking-tight">Create Account</h2>
-        <p class="text-sm text-[var(--text-secondary)] mb-8">{{ type }} Registration &mdash; Join WasteZero</p>
-        
-        <form id="register-form">
-            <div id="error-msg" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold text-center"></div>
-
-            {% if type == 'Admin' %}
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Setup Secret Key</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-key text-sm"></i></span>
-                    <input type="password" id="admin_secret" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="Required for first admin setup" required>
-                </div>
-            </div>
-            {% else %}
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Student ID</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-id-card text-sm"></i></span>
-                    <input type="text" id="student_id" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="e.g. ST12345" required>
-                </div>
-            </div>
-            {% endif %}
-            
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Full Name</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-user text-sm"></i></span>
-                    <input type="text" id="full_name" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" required>
-                </div>
-            </div>
-            
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Email Address</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-envelope text-sm"></i></span>
-                    <input type="email" id="email" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="you@university.edu" required>
-                </div>
-            </div>
-            
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Username</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-at text-sm"></i></span>
-                    <input type="text" id="username" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" required>
+<div style="display:flex;align-items:center;justify-content:center;min-height:70vh;padding:24px 16px;">
+    <div style="width:100%;max-width:460px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+            <!-- Header Accent -->
+            <div style="background:linear-gradient(135deg, var(--primary), var(--primary-dark));padding:24px 32px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:42px;height:42px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                        {% if type == 'Admin' %}
+                        <i class="fas fa-user-shield" style="color:white;font-size:18px;"></i>
+                        {% else %}
+                        <i class="fas fa-graduation-cap" style="color:white;font-size:18px;"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2 style="font-size:22px;font-weight:800;color:white;letter-spacing:-0.5px;">Create Account</h2>
+                        <p style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;">{{ type }} Registration</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="mb-5">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Password</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-lock text-sm"></i></span>
-                    <input type="password" id="password" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="••••••••" required>
+            <div style="padding:28px 32px;">
+                <!-- Error display -->
+                <div id="reg-error" style="display:none;padding:12px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;color:var(--danger);font-size:13px;font-weight:500;margin-bottom:16px;">
+                    <i class="fas fa-circle-exclamation" style="margin-right:6px;"></i>
+                    <span id="reg-error-text"></span>
+                </div>
+
+                <div id="reg-success" style="display:none;padding:12px 14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;color:var(--success);font-size:13px;font-weight:500;margin-bottom:16px;">
+                    <i class="fas fa-check-circle" style="margin-right:6px;"></i>
+                    <span id="reg-success-text"></span>
+                </div>
+
+                <form id="register-form" onsubmit="event.preventDefault(); handleRegister();">
+                    <div class="form-group">
+                        <label class="form-label" for="full_name">Full Name</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-user" style="font-size:13px;"></i></span>
+                            <input type="text" name="full_name" id="full_name" class="form-input" style="padding-left:40px;" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-at" style="font-size:13px;"></i></span>
+                            <input type="text" name="username" id="username" class="form-input" style="padding-left:40px;" placeholder="Choose a username" required>
+                        </div>
+                    </div>
+
+                    {% if type == 'Student' %}
+                    <div class="form-group">
+                        <label class="form-label" for="student_id">Student ID</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-id-card" style="font-size:13px;"></i></span>
+                            <input type="text" name="student_id" id="student_id" class="form-input" style="padding-left:40px;" placeholder="e.g. ST12345" required>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg_email">Email Address</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-envelope" style="font-size:13px;"></i></span>
+                            <input type="email" name="email" id="reg_email" class="form-input" style="padding-left:40px;" placeholder="you@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg_password">Password</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-lock" style="font-size:13px;"></i></span>
+                            <input type="password" name="password" id="reg_password" class="form-input" style="padding-left:40px;" placeholder="Min 6 characters" required minlength="6">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:4px;">
+                        <label class="form-label" for="confirm_password">Confirm Password</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-lock" style="font-size:13px;"></i></span>
+                            <input type="password" name="confirm_password" id="confirm_password" class="form-input" style="padding-left:40px;" placeholder="Re-enter password" required minlength="6">
+                        </div>
+                    </div>
+
+                    {% if type == 'Admin' %}
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label" for="admin_secret">Admin Setup Secret</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-key" style="font-size:13px;"></i></span>
+                            <input type="password" name="admin_secret" id="admin_secret" class="form-input" style="padding-left:40px;" placeholder="Enter admin setup secret" required>
+                        </div>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+                            <i class="fas fa-info-circle" style="margin-right:4px;"></i>
+                            Contact your system administrator for the setup secret.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" id="register-btn" class="btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-top:20px;">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Create Account</span>
+                    </button>
+                </form>
+
+                <div style="margin-top:20px;text-align:center;">
+                    {% if type == 'Admin' %}
+                    <p style="font-size:12px;color:var(--text-muted);">
+                        Already have an account? <a href="{{ url_for('login') }}" style="color:var(--primary);text-decoration:none;font-weight:600;">Sign in</a>
+                    </p>
+                    {% else %}
+                    <p style="font-size:12px;color:var(--text-muted);">
+                        Already registered? <a href="{{ url_for('student_login') }}" style="color:var(--primary);text-decoration:none;font-weight:600;">Sign in</a>
+                    </p>
+                    {% endif %}
                 </div>
             </div>
-            
-            <div class="mb-8">
-                <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Confirm Password</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"><i class="fas fa-lock text-sm"></i></span>
-                    <input type="password" id="confirm" class="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--body-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none text-sm placeholder-[var(--text-secondary)]" placeholder="••••••••" required>
-                </div>
-            </div>
-            
-            <button type="submit" id="submit-btn" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-[1.01] transition-all duration-300 text-sm">
-                Create Firebase Account
-            </button>
-        </form>
-        
-        <p class="mt-8 text-center text-xs text-[var(--text-secondary)]">
-            Already have an account? 
-            <a href="{{ url_for('login') if type == 'Admin' else url_for('student_login') }}" class="text-indigo-400 hover:text-indigo-300 font-bold ml-1">Sign in</a>
-        </p>
+        </div>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
-    const firebaseConfig = {
-        apiKey: "{{ config.get('FIREBASE_API_KEY', 'YOUR_API_KEY') }}",
-        authDomain: "{{ config.get('FIREBASE_AUTH_DOMAIN', 'YOUR_AUTH_DOMAIN') }}",
-        projectId: "{{ config.get('FIREBASE_PROJECT_ID', 'YOUR_PROJECT_ID') }}",
-        storageBucket: "{{ config.get('FIREBASE_STORAGE_BUCKET', '') }}",
-        messagingSenderId: "{{ config.get('FIREBASE_MESSAGING_SENDER_ID', '') }}",
-        appId: "{{ config.get('FIREBASE_APP_ID', '') }}"
-    };
+<script>
+    const REG_ROLE = "{{ type | lower }}";
+    let firebaseReady = false;
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    async function initFirebaseAuth() {
+        try {
+            const res = await fetch('/api/firebase-config');
+            const config = await res.json();
+            if (!config.apiKey) {
+                showRegError('Firebase is not configured. Contact the administrator.');
+                return;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+            firebaseReady = true;
+        } catch (e) {
+            console.error('Could not load Firebase config:', e);
+            showRegError('Could not connect to the server. Please try again later.');
+        }
+    }
 
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const role = "{{ type }}";
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('error-msg');
-        const btn = document.getElementById('submit-btn');
+    initFirebaseAuth();
 
-        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
-            errorDiv.innerText = "Firebase Error: API Key is missing. Add FIREBASE_API_KEY to your .env file.";
-            errorDiv.classList.remove('hidden');
+    function showRegError(msg) {
+        const el = document.getElementById('reg-error');
+        document.getElementById('reg-error-text').textContent = msg;
+        el.style.display = 'block';
+        document.getElementById('reg-success').style.display = 'none';
+    }
+
+    function showRegSuccess(msg) {
+        const el = document.getElementById('reg-success');
+        document.getElementById('reg-success-text').textContent = msg;
+        el.style.display = 'block';
+        document.getElementById('reg-error').style.display = 'none';
+    }
+
+    async function handleRegister() {
+        const fullName = document.getElementById('full_name').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('reg_email').value.trim();
+        const password = document.getElementById('reg_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const btn = document.getElementById('register-btn');
+
+        // Validation
+        if (!fullName || !username || !email || !password || !confirmPassword) {
+            showRegError('Please fill in all fields.');
             return;
         }
 
-        if (password !== confirm) {
-            errorDiv.innerText = "Passwords do not match.";
-            errorDiv.classList.remove('hidden');
+        if (password !== confirmPassword) {
+            showRegError('Passwords do not match.');
             return;
         }
+
+        if (password.length < 6) {
+            showRegError('Password must be at least 6 characters long.');
+            return;
+        }
+
+        if (!firebaseReady) {
+            showRegError('Firebase is not ready. Please refresh and try again.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+        document.getElementById('reg-error').style.display = 'none';
 
         try {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-            errorDiv.classList.add('hidden');
+            // Create Firebase account
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
 
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const idToken = await user.getIdToken();
+            // Update display name
+            await userCredential.user.updateProfile({ displayName: fullName });
 
-            // Send to Flask to complete registration
+            const idToken = await userCredential.user.getIdToken();
+
+            // Build registration data
+            const regData = {
+                idToken: idToken,
+                role: REG_ROLE,
+                full_name: fullName,
+                username: username
+            };
+
+            if (REG_ROLE === 'student') {
+                const studentId = document.getElementById('student_id')?.value.trim();
+                if (!studentId) {
+                    showRegError('Student ID is required.');
+                    return;
+                }
+                regData.student_id = studentId;
+            }
+
+            if (REG_ROLE === 'admin') {
+                const adminSecret = document.getElementById('admin_secret')?.value.trim();
+                if (!adminSecret) {
+                    showRegError('Admin setup secret is required.');
+                    return;
+                }
+                regData.admin_secret = adminSecret;
+            }
+
+            // Register with WasteZero backend
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    idToken,
-                    role: role.toLowerCase(),
-                    full_name,
-                    username,
-                    student_id,
-                    admin_secret
-                })
+                body: JSON.stringify(regData)
             });
 
             const data = await res.json();
-            if(!res.ok) {
-                // Remove firebase user if backend fails
-                await user.delete();
-                throw new Error(data.error || 'Server rejected registration');
-            }
 
-            window.location.href = data.redirect;
+            if (data.success) {
+                showRegSuccess('Account created successfully! Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 1500);
+            } else {
+                showRegError(data.error || 'Registration failed. Please try again.');
+                // Delete the Firebase account if backend registration failed
+                try {
+                    await firebase.auth().currentUser?.delete();
+                } catch (e) { /* ignore */ }
+            }
         } catch (error) {
-            errorDiv.innerText = error.message;
-            errorDiv.classList.remove('hidden');
-            btn.innerHTML = 'Create Firebase Account';
+            console.error('Registration error:', error);
+            const errorMessages = {
+                'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
+                'auth/invalid-email': 'Invalid email address.',
+                'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+                'auth/network-request-failed': 'Network error. Check your connection.'
+            };
+            showRegError(errorMessages[error.code] || error.message || 'An error occurred during registration.');
+        } finally {
             btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-plus"></i><span>Create Account</span>';
         }
-    });
+    }
 </script>
 {% endblock %}

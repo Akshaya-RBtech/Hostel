@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import os
 import joblib
 
@@ -11,26 +12,26 @@ db = SQLAlchemy()
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(120), nullable=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    full_name = db.Column(db.String(120), nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=True)
-    password = db.Column(db.String(255), nullable=True) # Hashed password
-    role = db.Column(db.String(20), nullable=False, default='student') # 'admin' or 'student'
+    password = db.Column(db.String(120), nullable=True)  # Password for admin, None for students initially
+    role = db.Column(db.String(20), nullable=False, default='student')  # 'admin' or 'student'
     student_id = db.Column(db.String(50), unique=True, nullable=True)
 
 class MenuEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(20), nullable=False)
-    meal_type = db.Column(db.String(20), nullable=False) # Breakfast, Lunch, Snacks, Dinner
+    meal_type = db.Column(db.String(20), nullable=False)  # Breakfast, Lunch, Snacks, Dinner
     items = db.Column(db.Text, nullable=False)
-    event_type = db.Column(db.String(20), default='Normal') # Normal, Festival, Holiday
+    event_type = db.Column(db.String(20), default='Normal')  # Normal, Festival, Holiday
     published = db.Column(db.Boolean, default=True)
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.String(50), nullable=False)
     menu_id = db.Column(db.Integer, db.ForeignKey('menu_entry.id'), nullable=False)
-    choice = db.Column(db.String(10), nullable=False) # 'Yes' or 'No'
+    choice = db.Column(db.String(10), nullable=False)  # 'Yes' or 'No'
     reason = db.Column(db.String(255), nullable=True)
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
@@ -59,7 +60,7 @@ class FoodConsumption(db.Model):
         self.recommendations = recommendations
 
 
-# ── NEW: AI Report Model ──
+# ── AI Report Model ──
 class AIReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -70,7 +71,7 @@ class AIReport(db.Model):
     generated_at = db.Column(db.DateTime, server_default=db.func.now())
 
 
-# ── NEW: Chat Message Model ──
+# ── Chat Message Model ──
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(100), nullable=False)
@@ -110,52 +111,18 @@ class FoodPredictor:
         X['meal_type'] = self.le_meal.transform(X['meal_type'])
         X['event_type'] = self.le_event.transform(X['event_type'])
         
-        self.model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=100)
+        self.model = xgb.XGBRegressor(
+            objective='reg:squarederror',
+            n_estimators=100,
+            max_depth=4,
+            learning_rate=0.1,
+            random_state=42
+        )
         self.model.fit(X, y)
         
         joblib.dump(self.model, self.model_path)
         print("Model trained and saved.")
         return True
-
-    def evaluate(self):
-        import pandas as pd
-        from sklearn.metrics import mean_absolute_error, mean_squared_error
-        import math
-        
-        if not os.path.exists(self.data_path):
-            return {"error": "No data available for evaluation"}
-        
-        df = pd.read_csv(self.data_path)
-        X = df[['day_of_week', 'meal_type', 'event_type', 'student_yes_count', 'guest_count']]
-        y = df['actual_quantity']
-        
-        X = X.copy()
-        try:
-            X['day_of_week'] = self.le_day.transform(X['day_of_week'])
-            X['meal_type'] = self.le_meal.transform(X['meal_type'])
-            X['event_type'] = self.le_event.transform(X['event_type'])
-        except Exception:
-            pass # fallbacks
-            
-        if self.model is None:
-            if os.path.exists(self.model_path):
-                self.model = joblib.load(self.model_path)
-            else:
-                self.train()
-
-        if self.model is None:
-            return {"error": "Model could not be initialized"}
-            
-        preds = self.model.predict(X)
-        mae = mean_absolute_error(y, preds)
-        rmse = math.sqrt(mean_squared_error(y, preds))
-        
-        return {
-            "mae": round(mae, 2),
-            "rmse": round(rmse, 2),
-            "samples": len(y)
-        }
-
 
     def predict(self, day, meal, event, yes_count, guest_count):
         if self.model is None:
@@ -166,7 +133,7 @@ class FoodPredictor:
         
         # In case training failed
         if self.model is None:
-            return float(yes_count + guest_count) # Fallback prediction
+            return float(yes_count + guest_count)  # Fallback prediction
 
         # Encode inputs
         try:
@@ -182,3 +149,40 @@ class FoodPredictor:
         
         prediction = self.model.predict(features)[0]
         return float(prediction)
+
+    def evaluate(self):
+        """Evaluate the model using the training data with a simple holdout."""
+        if not os.path.exists(self.data_path):
+            return {'error': 'No data file found for evaluation.'}
+        
+        df = pd.read_csv(self.data_path)
+        
+        if len(df) < 5:
+            return {'error': 'Insufficient data for evaluation. Need at least 5 records.'}
+        
+        X = df[['day_of_week', 'meal_type', 'event_type', 'student_yes_count', 'guest_count']].copy()
+        y = df['actual_quantity']
+        
+        X['day_of_week'] = self.le_day.transform(X['day_of_week'])
+        X['meal_type'] = self.le_meal.transform(X['meal_type'])
+        X['event_type'] = self.le_event.transform(X['event_type'])
+        
+        if self.model is None:
+            if os.path.exists(self.model_path):
+                self.model = joblib.load(self.model_path)
+            else:
+                return {'error': 'No trained model available.'}
+        
+        y_pred = self.model.predict(X)
+        
+        mae = round(float(mean_absolute_error(y, y_pred)), 2)
+        rmse = round(float(np.sqrt(mean_squared_error(y, y_pred))), 2)
+        r2 = round(float(r2_score(y, y_pred)), 4)
+        
+        return {
+            'mae': mae,
+            'rmse': rmse,
+            'r2': r2,
+            'samples': len(df),
+            'note': 'Evaluated on training data (small dataset). For production, use time-based train/test split.'
+        }

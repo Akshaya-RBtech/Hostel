@@ -1,27 +1,33 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-[70vh] text-center fade-in py-8 px-4">
-    <div class="mb-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl inline-block shadow-lg shadow-indigo-500/10">
-        <i class="fas fa-leaf text-3xl text-indigo-400"></i>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:32px 16px;">
+
+    <div style="margin-bottom:24px;padding:18px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15);border-radius:20px;display:inline-block;box-shadow:0 8px 30px rgba(99,102,241,0.1);">
+        <i class="fas fa-leaf" style="font-size:32px;color:var(--primary);"></i>
     </div>
 
-    <h1 class="text-3xl font-extrabold text-white mb-2 leading-tight tracking-tight">
+    <h1 style="font-size:36px;font-weight:900;color:var(--text-primary);margin-bottom:8px;letter-spacing:-1px;line-height:1.1;">
         WasteZero
     </h1>
-    
-    <p class="text-sm text-slate-400 mb-8 max-w-sm">
+
+    <p style="font-size:15px;color:var(--text-secondary);margin-bottom:32px;max-width:340px;line-height:1.6;">
         Smart Canteen. Less Waste.<br>A Greener Future.
     </p>
 
-    <div class="w-full max-w-xs flex flex-col gap-4">
-        <a href="{{ url_for('login') }}" class="btn-primary w-full justify-center py-3 text-sm">
+    <div style="width:100%;max-width:280px;display:flex;flex-direction:column;gap:12px;">
+        <a href="{{ url_for('login') }}" class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:14px;text-decoration:none;">
             <i class="fas fa-user-shield"></i> Admin Login
         </a>
 
-        <a href="{{ url_for('student_login') }}" class="btn-secondary w-full justify-center py-3 text-sm" style="background:rgba(255,255,255,0.05);">
+        <a href="{{ url_for('student_login') }}" class="btn-secondary" style="width:100%;justify-content:center;padding:14px;font-size:14px;text-decoration:none;">
             <i class="fas fa-graduation-cap"></i> Student Login
         </a>
+    </div>
+
+    <div style="margin-top:40px;display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:11px;font-weight:600;">
+        <div style="width:6px;height:6px;background:var(--success);border-radius:50%;animation:pulse-dot 2s infinite;"></div>
+        AI-Powered Food Waste Management
     </div>
 </div>
 {% endblock %}
