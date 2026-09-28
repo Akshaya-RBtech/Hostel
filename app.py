@@ -11,7 +11,7 @@ ADMIN_SETUP_SECRET = os.environ.get("ADMIN_SETUP_SECRET", "")
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage
+from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage, MenuPoll, MenuPollOption, MenuPollVote, Notification, MealFeedback
 from ai_engine import WasteAnalyticsAI
 from datetime import datetime, timedelta
 
@@ -37,6 +37,186 @@ ai_engine = WasteAnalyticsAI()
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# ── Smart Features APIs ──
+
+@app.route('/api/student/dashboard_data')
+@login_required
+def dashboard_data():
+    if current_user.role != 'student':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    now = datetime.now()
+    # Upcoming meals
+    upcoming = MenuEntry.query.filter(
+        db.func.datetime(MenuEntry.date) >= db.func.date(now)
+    ).order_by(MenuEntry.date.asc()).limit(10).all()
+    
+    # Active polls
+    polls = MenuPoll.query.filter_by(status='active').all()
+    poll_data = []
+    for p in polls:
+        has_voted = MenuPollVote.query.filter_by(poll_id=p.id, student_id=current_user.student_id).first() is not None
+        if not has_voted:
+            poll_data.append({
+                'id': p.id,
+                'question': p.question,
+                'deadline': p.deadline.isoformat() if p.deadline else None,
+                'options': [{'id': o.id, 'text': o.option_text} for o in p.options]
+            })
+            
+    # Unread notifications
+    notifications = Notification.query.filter(
+        db.or_(Notification.target_role == 'all', 
+               Notification.target_role == 'student',
+               Notification.target_user_id == current_user.student_id)
+    ).order_by(Notification.timestamp.desc()).limit(15).all()
+
+    notif_data = [{
+        'id': n.id,
+        'title': n.title,
+        'message': n.message,
+        'timestamp': n.timestamp.isoformat()
+    } for n in notifications]
+
+    return jsonify({
+        'polls': poll_data,
+        'notifications': notif_data
+    })
+
+@app.route('/api/student/confirm_meal', methods=['POST'])
+@login_required
+def confirm_meal():
+    if current_user.role != 'student':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    data = request.json
+    menu_id = data.get('menu_id')
+    choice = data.get('choice') # 'Yes' or 'No'
+    reason = data.get('reason')
+    
+    if choice == 'No' and not reason:
+        return jsonify({'error': 'A reason is required when skipping.'}), 400
+        
+    menu = MenuEntry.query.get(menu_id)
+    if not menu:
+        return jsonify({'error': 'Menu not found.'}), 404
+        
+    if menu.deadline and datetime.now() > menu.deadline:
+        return jsonify({'error': 'Confirmation deadline has passed.'}), 400
+        
+    existing_vote = Vote.query.filter_by(student_id=current_user.student_id, menu_id=menu_id).first()
+    if existing_vote:
+        existing_vote.choice = choice
+        existing_vote.reason = reason if choice == 'No' else None
+    else:
+        vote = Vote(student_id=current_user.student_id, menu_id=menu_id, choice=choice, reason=reason if choice == 'No' else None)
+        db.session.add(vote)
+        
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Confirmation saved correctly.'})
+
+@app.route('/api/poll/vote', methods=['POST'])
+@login_required
+def submit_poll_vote():
+    if current_user.role != 'student':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    data = request.json
+    poll_id = data.get('poll_id')
+    option_id = data.get('option_id')
+    
+    poll = MenuPoll.query.get(poll_id)
+    if not poll or poll.status != 'active':
+        return jsonify({'error': 'Poll not active.'}), 400
+        
+    if poll.deadline and datetime.now() > poll.deadline:
+        return jsonify({'error': 'Poll has closed.'}), 400
+        
+    existing = MenuPollVote.query.filter_by(poll_id=poll_id, student_id=current_user.student_id).first()
+    if existing:
+        return jsonify({'error': 'You have already voted in this poll.'}), 400
+        
+    vote = MenuPollVote(poll_id=poll_id, option_id=option_id, student_id=current_user.student_id)
+    db.session.add(vote)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/feedback/submit', methods=['POST'])
+@login_required
+def submit_feedback():
+    if current_user.role != 'student':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    data = request.json
+    menu_id = data.get('menu_id')
+    dish_name = data.get('dish_name')
+    rating = data.get('rating')
+    category = data.get('category')
+    comments = data.get('comments')
+    
+    fb = MealFeedback(
+        student_id=current_user.student_id,
+        menu_id=menu_id,
+        dish_name=dish_name,
+        rating=rating,
+        category=category,
+        comments=comments
+    )
+    db.session.add(fb)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/admin/poll/create', methods=['POST'])
+@login_required
+def create_poll():
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    data = request.json
+    question = data.get('question')
+    options = data.get('options', [])
+    deadline_str = data.get('deadline')
+    
+    if not question or len(options) < 2:
+        return jsonify({'error': 'Question and at least two options are required.'}), 400
+        
+    deadline = None
+    if deadline_str:
+        try:
+            deadline = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
+        except:
+            pass
+            
+    poll = MenuPoll(question=question, deadline=deadline)
+    db.session.add(poll)
+    db.session.flush() # get ID
+    
+    for opt in options:
+        o = MenuPollOption(poll_id=poll.id, option_text=opt)
+        db.session.add(o)
+        
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/admin/notifications/create', methods=['POST'])
+@login_required
+def create_notification():
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    data = request.json
+    title = data.get('title')
+    message = data.get('message')
+    target_role = data.get('target_role', 'all')
+    
+    if not title or not message:
+        return jsonify({'error': 'Title and message are required.'}), 400
+        
+    notif = Notification(title=title, message=message, target_role=target_role)
+    db.session.add(notif)
+    db.session.commit()
+    return jsonify({'success': True})
 
 # ── Helper: Get consumption data as dicts ──
 def get_consumption_dicts():
@@ -117,9 +297,31 @@ def safe_migrate_db():
         
         conn.commit()
     except Exception as e:
-        print(f"[Migration] Warning: {e}")
-    finally:
-        conn.close()
+        print(f"[Migration] Warning for user table: {e}")
+
+    try:
+        cursor.execute("PRAGMA table_info(menu_entry)")
+        columns = [col[1] for col in cursor.fetchall()]
+
+        if columns: # Ensure table exists before altering
+            if 'deadline' not in columns:
+                cursor.execute("ALTER TABLE menu_entry ADD COLUMN deadline DATETIME")
+                print("[Migration] Added 'deadline' column to menu_entry table.")
+            
+            if 'image_url' not in columns:
+                cursor.execute("ALTER TABLE menu_entry ADD COLUMN image_url VARCHAR(255)")
+                print("[Migration] Added 'image_url' column to menu_entry table.")
+                
+            conn.commit()
+    except Exception as e:
+        print(f"[Migration] Warning for menu_entry table: {e}")
+        
+    # Generic cleanup
+    try:
+        if conn:
+            conn.close()
+    except Exception:
+        pass
 
 
 def init_db():
