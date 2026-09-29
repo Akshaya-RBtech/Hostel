@@ -26,47 +26,6 @@ class MenuEntry(db.Model):
     items = db.Column(db.Text, nullable=False)
     event_type = db.Column(db.String(20), default='Normal')  # Normal, Festival, Holiday
     published = db.Column(db.Boolean, default=True)
-    deadline = db.Column(db.DateTime, nullable=True) # Optional deadline for student confirmations
-    image_url = db.Column(db.String(255), nullable=True)
-
-class MenuPoll(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(20), default='active') # active, closed
-    published_result = db.Column(db.Boolean, default=False)
-    deadline = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-
-class MenuPollOption(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    poll_id = db.Column(db.Integer, db.ForeignKey('menu_poll.id'), nullable=False)
-    option_text = db.Column(db.String(255), nullable=False)
-    poll = db.relationship('MenuPoll', backref=db.backref('options', cascade='all, delete-orphan'))
-
-class MenuPollVote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    poll_id = db.Column(db.Integer, db.ForeignKey('menu_poll.id'), nullable=False)
-    option_id = db.Column(db.Integer, db.ForeignKey('menu_poll_option.id'), nullable=False)
-    student_id = db.Column(db.String(50), nullable=False)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
-
-class MealFeedback(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.String(50), nullable=False)
-    menu_id = db.Column(db.Integer, db.ForeignKey('menu_entry.id'), nullable=True)
-    dish_name = db.Column(db.String(120), nullable=True)
-    rating = db.Column(db.Integer, nullable=True) # 1 to 5
-    category = db.Column(db.String(50), nullable=True) # e.g. 'Too spicy', 'Excellent'
-    comments = db.Column(db.Text, nullable=True)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
-
-class Notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    target_role = db.Column(db.String(20), default='all') # 'all', 'student', 'admin'
-    target_user_id = db.Column(db.String(50), nullable=True) # Optional specific student_id
-    title = db.Column(db.String(120), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -120,6 +79,26 @@ class ChatMessage(db.Model):
     content = db.Column(db.Text, nullable=False)
     msg_type = db.Column(db.String(20), default='text')  # 'text', 'report', 'forecast'
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
+
+# ── Notifications and Announcements (New Features) ──
+class Announcement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), default='General')  # General, Menu, Urgent
+    target_audience = db.Column(db.String(50), default='all') # all, specific
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    created_by = db.Column(db.String(80), nullable=True) # admin username
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    
+    user = db.relationship('User', backref=db.backref('notifications', lazy=True))
 
 
 class FoodPredictor:

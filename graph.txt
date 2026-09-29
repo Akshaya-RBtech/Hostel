@@ -1,0 +1,17 @@
+* bfb5637 Complete WasteZero Upgrade: Theme, AI Engine, Firebase & App fixes without secrets
+* b4784aa Include measurementId inside dynamic Firebase config mapping
+* 8925aaf Finalize all fixes for Render deployment
+* 7b7855f Fix Firebase configuration-not-found error by validating backend injection completeness
+* b7897fc Fix password confirmation and JS variables in register logic
+* e8a0476 Fix Firebase missing config export on Render
+* fc6977e Update .env.example with API keys and secrets
+* 4baa186 Update WasteZero configuration
+* 191d546 Update Firebase configuration and app files
+* 23b079f Add Firebase Admin dependency
+* 7350af4 Merge remote changes
+*   013c809 Merge remote changes
+|\  
+| * 1ee7d42 Update context string for WasteZero AI assistant
+* | e2a4e02 Fix multiline context syntax
+|/  
+* c089d60 first commit

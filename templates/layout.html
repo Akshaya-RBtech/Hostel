@@ -712,6 +712,23 @@
         </a>
 
         <div class="header-right">
+            {% if current_user.is_authenticated and current_user.role == 'student' %}
+            <!-- Notification Bell -->
+            <div class="theme-dropdown-container" id="notif-container">
+                <button class="theme-dropdown-btn" id="notif-toggle-btn" onclick="toggleNotifMenu()" aria-label="Notifications" style="position:relative;padding:8px;border-radius:50%;border:none;background:rgba(99,102,241,0.1);">
+                    <i class="fas fa-bell" style="font-size:16px;color:var(--primary);"></i>
+                    <span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:var(--danger);color:white;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;align-items:center;justify-content:center;transform:translate(20%, -20%);">0</span>
+                </button>
+                <div class="theme-dropdown-menu" id="notif-menu" style="min-width:320px;right:-40px;">
+                    <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:13px;font-weight:700;">Notifications</span>
+                        <button onclick="readAllNotifs()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer;">Mark all read</button>
+                    </div>
+                    <div id="notif-list" style="max-height:300px;overflow-y:auto;background:var(--card-bg);border-radius:0 0 12px 12px;"></div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Theme Dropdown -->
             <div class="theme-dropdown-container" id="theme-container">
                 <button class="theme-dropdown-btn" id="theme-toggle-btn" onclick="toggleThemeMenu()" aria-label="Theme Selector">
@@ -827,11 +844,64 @@
             if (container && !container.contains(e.target)) {
                 document.getElementById('theme-menu')?.classList.remove('open');
             }
+            const notifContainer = document.getElementById('notif-container');
+            if (notifContainer && !notifContainer.contains(e.target)) {
+                document.getElementById('notif-menu')?.classList.remove('open');
+            }
         });
 
         // Init label
         updateThemeLabel(localStorage.getItem(THEME_KEY) || 'system');
         updateThemeMenuHighlight();
+
+        /* ===== NOTIFICATION LOGIC ===== */
+        function toggleNotifMenu() {
+            const menu = document.getElementById('notif-menu');
+            if(menu) menu.classList.toggle('open');
+            fetchNotifications();
+        }
+
+        async function fetchNotifications() {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+            if(!list) return;
+            try {
+                const res = await fetch('/api/notifications');
+                const data = await res.json();
+                if(data.error) return;
+                
+                if (data.unread_count > 0) {
+                    badge.style.display = 'flex';
+                    badge.innerText = data.unread_count;
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (data.notifications.length === 0) {
+                    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">No notifications.</div>`;
+                } else {
+                    list.innerHTML = data.notifications.map(n => `
+                        <div style="padding:12px 14px;border-bottom:1px solid var(--border);background:${n.is_read ? 'transparent' : 'rgba(99,102,241,0.05)'}">
+                            <div style="font-size:13px;font-weight:${n.is_read ? '600' : '800'};color:var(--text-primary);margin-bottom:4px;">${n.title}</div>
+                            <div style="font-size:12px;color:var(--text-secondary);line-height:1.4;">${n.message}</div>
+                            <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">${n.created_at}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error('Error fetching notifications:', e); }
+        }
+
+        async function readAllNotifs() {
+            try {
+                await fetch('/api/notifications/read-all', { method: 'POST' });
+                fetchNotifications();
+            } catch(e) {}
+        }
+
+        if (document.getElementById('notif-badge')) {
+            fetchNotifications();
+            setInterval(fetchNotifications, 20000); // refresh every 20s
+        }
     </script>
 </body>
 </html>
