@@ -316,32 +316,89 @@
         </div>
     </div>
 
-    <!-- ===== COMPLAINTS TAB ===== -->
+    <!-- ===== COMPLAINTS TAB (Image 10) ===== -->
     <div id="content-complaints" class="tab-content" style="display:none;">
-    <!-- Operations Section: Complaints & Leave -->
-    <div class="grid grid-cols-1 gap-5 mb-8">
-        <!-- New Complaint -->
-        <div class="card" style="padding:20px;">
-            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">
-                <i class="fas fa-flag" style="color:var(--danger);margin-right:8px;"></i>File a Mess Complaint
-            </h3>
-            <form onsubmit="submitStudentComplaint(event)">
-                <select id="comp-category" class="form-input" style="margin-bottom:10px;width:100%;font-size:13px;" required>
-                    <option value="">Select Category...</option>
-                    <option value="Food Quality">Food Quality & Taste</option>
-                    <option value="Cleanliness">Hygiene & Cleanliness</option>
-                    <option value="Meal Timing">Meal Timings</option>
-                    <option value="Portion Size">Portion Size</option>
-                    <option value="Other">Other Issues</option>
-                </select>
-                <textarea id="comp-description" class="form-input" rows="3" placeholder="Describe your issue..." style="margin-bottom:10px;width:100%;font-size:13px;" required></textarea>
-                <button type="submit" class="btn-primary" style="width:100%;padding:10px;display:flex;justify-content:center;">
-                    <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Submit Complaint
+        <div class="card" style="padding:24px;background:white;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);max-width:540px;margin:0 auto;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;border-bottom:1px solid #f1f5f9;padding-bottom:16px;">
+                <div style="width:36px;height:36px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#16a34a;font-size:16px;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 style="font-size:16px;font-weight:800;color:#1e293b;margin:0;">Submit Complaint</h3>
+            </div>
+            
+            <form onsubmit="submitStudentComplaint(event)" style="display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Category</label>
+                    <select id="comp-category" class="form-input" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;background:white;-webkit-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 12px top 50%;background-size:10px auto;" required>
+                        <option value="Food Quality">Food Quality</option>
+                        <option value="Cleanliness">Cleanliness</option>
+                        <option value="Meal Timing">Meal Timing</option>
+                        <option value="Staff Behavior">Staff Behavior</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Subject</label>
+                    <select id="comp-subject" class="form-input" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;background:white;-webkit-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 12px top 50%;background-size:10px auto;">
+                        <option value="Food too spicy">Food too spicy</option>
+                        <option value="Food too salty">Food too salty</option>
+                        <option value="Undercooked meal">Undercooked meal</option>
+                        <option value="Mess hygiene poor">Mess hygiene poor</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Description</label>
+                    <textarea id="comp-description" class="form-input" rows="3" placeholder="The food was too spicy today. Please consider reducing the spice level." style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;" required></textarea>
+                </div>
+                
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Upload Complaint</label>
+                    <div style="display:flex;align-items:center;border:1px solid #cbd5e1;border-radius:8px;padding:6px;background:white;gap:10px;">
+                        <label for="comp-file" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                            <i class="fas fa-camera"></i> Choose file
+                        </label>
+                        <input type="file" id="comp-file" style="display:none;">
+                        <span style="font-size:12px;color:#94a3b8;">No file chosen</span>
+                    </div>
+                </div>
+
+                <div id="comp-status" style="font-size:12px;display:none;font-weight:600;text-align:center;"></div>
+                
+                <button type="submit" class="btn-primary" style="width:100%;padding:14px;display:flex;justify-content:center;background:var(--primary);border:none;border-radius:8px;font-size:15px;font-weight:700;margin-top:8px;">
+                    Submit Complaint
                 </button>
             </form>
-            <div id="comp-status" style="margin-top:10px;font-size:12px;display:none;font-weight:600;text-align:center;"></div>
+
+            <div style="margin-top:40px;">
+                <h4 style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">My Complaints</h4>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;text-align:left;">
+                        <thead>
+                            <tr style="border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12px;">
+                                <th style="padding:10px 0;font-weight:700;">Date</th>
+                                <th style="padding:10px 0;font-weight:700;">Subject</th>
+                                <th style="padding:10px 0;font-weight:700;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:12px 0;">Apr 27, 2025</td>
+                                <td style="padding:12px 0;">Food quality</td>
+                                <td style="padding:12px 0;"><span style="padding:4px 8px;border-radius:100px;background:#fef3c7;color:#d97706;font-weight:700;font-size:10px;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-clock"></i> In Progress</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:12px 0;">Apr 20, 2025</td>
+                                <td style="padding:12px 0;">Cleanliness</td>
+                                <td style="padding:12px 0;"><span style="padding:4px 8px;border-radius:100px;background:#dcfce7;color:#16a34a;font-weight:700;font-size:10px;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-check"></i> Resolved</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
     </div> <!-- END COMPLAINTS TAB -->
 
     <!-- ===== LEAVES TAB (Image 8 logic) ===== -->

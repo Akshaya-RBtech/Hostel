@@ -95,57 +95,82 @@
                 </div>
             </div>
 
-            <!-- Published menus table -->
-            <div class="card col-span-1 lg:col-span-2">
-                <div class="card-header">
-                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
-                        <div>
-                            <div class="section-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:6px;"></i> Weekly Menu</div>
-                            <div class="section-sub">Manage currently published menus for this week</div>
-                        </div>
-                        <div style="display:flex;gap:8px;">
-                            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;"><i class="fas fa-save" style="margin-right:4px;"></i> Save Draft</button>
-                            <button class="btn-primary" style="font-size:12px;padding:6px 12px;background:var(--success);border-color:var(--success);"><i class="fas fa-cloud-arrow-up" style="margin-right:4px;"></i> Publish</button>
-                        </div>
+            <!-- Published menus table (Image 14) -->
+            <div class="card col-span-1 lg:col-span-2" style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);box-shadow:0 10px 40px rgba(0,0,0,0.05);overflow:hidden;">
+                <!-- Header Component -->
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid #f1f5f9;background:white;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="fas fa-leaf" style="color:#16a34a;font-size:20px;"></i>
+                        <span style="font-size:16px;font-weight:700;color:#1e293b;">Weekly Menu</span>
+                    </div>
+                    <div style="display:flex;gap:14px;color:#64748b;font-size:13px;align-items:center;">
+                        <i class="fas fa-rotate" style="cursor:pointer;background:#f1f5f9;padding:6px;border-radius:50%;color:#1e293b;width:24px;height:24px;display:flex;justify-content:center;align-items:center;"></i>
+                        <div style="width:1px;height:16px;background:#cbd5e1;"></div>
+                        <i class="fas fa-user" style="cursor:pointer;color:#1e293b;background:#f1f5f9;padding:6px;border-radius:50%;width:24px;height:24px;display:flex;justify-content:center;align-items:center;"></i>
+                        <i class="fas fa-ellipsis-v" style="cursor:pointer;"></i>
                     </div>
                 </div>
+                
+                <!-- Sub Header (Date Switch / Actions) -->
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:white;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:16px;font-size:13px;font-weight:700;color:#1e293b;background:#f8fafc;padding:8px 16px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;">
+                        <i class="fas fa-chevron-left" style="color:#64748b;font-size:11px;"></i>
+                        <span>Apr 28 — May 4, 2025</span>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #3b82f6;color:#3b82f6;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                            <i class="fas fa-pencil-alt"></i> Save Draft
+                        </button>
+                        <button style="display:flex;align-items:center;gap:6px;background:#16a34a;border:none;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                            <i class="fas fa-calendar-check"></i> Publish
+                        </button>
+                    </div>
+                </div>
+
                 <div style="overflow-x:auto;">
-                    <table class="data-table">
-                        <thead style="background:rgba(0,0,0,0.02);">
-                            <tr>
-                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Day</th>
-                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Breakfast</th>
-                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Lunch</th>
-                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Snacks</th>
-                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Dinner</th>
+                    <table class="data-table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead style="background:rgba(0,0,0,0.01);">
+                            <tr style="border-bottom:1px solid #e2e8f0;">
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;">Day</th>
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;">Breakfast</th>
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;">Lunch</th>
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;">Snacks</th>
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;">Dinner</th>
+                                <th style="padding:14px 20px;color:#475569;font-weight:700;font-size:12px;"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for date, items in weekly_menus | groupby('date') %}
-                            <tr style="border-bottom:1px solid var(--border);transition:all 0.2s;">
-                                <td style="padding:16px 20px;vertical-align:top;font-weight:700;color:var(--text-primary);">
-                                    <div style="display:flex;flex-direction:column;">
-                                        <span style="font-size:11px;text-transform:uppercase;color:var(--text-secondary);">Day</span>
-                                        <span style="font-size:13px;letter-spacing:-0.5px;">{{ date }}</span>
+                            <tr style="border-bottom:1px solid #f1f5f9;background:white;transition:all 0.2s;">
+                                <td style="padding:16px 20px;vertical-align:top;">
+                                    <div style="display:flex;align-items:flex-start;gap:6px;">
+                                        <div style="display:flex;flex-direction:column;font-weight:800;color:#1e293b;margin-top:-2px;">
+                                            <span style="font-size:12px;line-height:1.2;">Day</span>
+                                            <span style="font-size:14px;line-height:1.2;">{{ date[-2:] }}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 {% for meal in ['Breakfast', 'Lunch', 'Snacks', 'Dinner'] %}
                                     {% set m = items | selectattr('meal_type', 'equalto', meal) | first %}
-                                    <td style="padding:16px 20px;vertical-align:top;color:var(--text-primary);">
+                                    <td style="padding:16px 20px;vertical-align:middle;color:#475569;font-weight:500;font-size:12px;">
                                         {% if m %}
-                                            <div style="font-weight:500;font-size:12px;margin-bottom:8px;line-height:1.4;color:var(--text-primary);">{{ m.items }}</div>
-                                            <div style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
-                                                <i class="fas fa-utensils"></i> {{ m.kitchen_status or 'Planned' }}
-                                            </div>
+                                            {{ m.items | replace(',', ' • ') }}
                                         {% else %}
-                                            <span style="color:var(--text-muted);font-style:italic;font-size:11px;">-</span>
+                                            <span style="color:#cbd5e1;">-</span>
                                         {% endif %}
                                     </td>
                                 {% endfor %}
+                                <td style="padding:16px 20px;vertical-align:middle;text-align:right;">
+                                    <button style="background:#e0f2fe;color:#0ea5e9;border:1px solid transparent;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                                        <i class="fas fa-pencil-alt"></i> Edit
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                             {% if not weekly_menus %}
-                            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No menus mapped for this week.</td></tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">No menus designed for this week.</td>
+                            </tr>
                             {% endif %}
                         </tbody>
                     </table>
@@ -153,99 +178,157 @@
             </div>
         </div>
 
-        <!-- AI Meal Assistant Section -->
-        <div class="card" style="margin-top:24px;">
-            <div class="card-header">
+        <!-- AI Meal Assistant Section (Image 13) -->
+        <div class="card" style="margin-top:24px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);background:white;padding:20px;">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="icon-badge" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;">
-                        <i class="fas fa-wand-magic-sparkles"></i>
+                    <div style="width:36px;height:36px;background:#0ea5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;">
+                        <i class="fas fa-robot"></i>
                     </div>
-                    <div>
-                        <div class="section-title">AI Meal Assistant</div>
-                        <div class="section-sub">Smart menu generation and optimization</div>
-                    </div>
+                    <div style="font-size:16px;font-weight:800;color:#1e293b;">AI Meal Assistant</div>
+                </div>
+                <div style="display:flex;gap:12px;color:#64748b;font-size:14px;align-items:center;">
+                    <i class="fas fa-rotate-right" style="cursor:pointer;background:#f1f5f9;padding:6px;border-radius:50%;color:#1e293b;width:24px;height:24px;display:flex;justify-content:center;align-items:center;font-size:12px;"></i>
+                    <i class="fas fa-ellipsis-h" style="cursor:pointer;"></i>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Set Previous Menu -->
-                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
-                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-history" style="color:var(--primary);margin-right:6px;"></i>Set Previous Menu</div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Copy the previous week's actual menu to a draft for quick setup without publishing.</div>
-                        <button onclick="aiMealAction('previous')" class="btn-primary" style="width:100%;justify-content:center;box-shadow:none;">Set Previous Menu</button>
-                    </div>
-                    
-                    <!-- Generate New Menu -->
-                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
-                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-fire-burner" style="color:var(--primary);margin-right:6px;"></i>Generate New Menu</div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Create a suggested weekly menu based on AI analysis of student popularity and feedback.</div>
-                        <button onclick="aiMealAction('generate')" class="btn-primary" style="width:100%;justify-content:center;box-shadow:none;">Generate New Menu</button>
-                    </div>
 
-                    <!-- Improve Previous Menu -->
-                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
-                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-arrow-trend-up" style="color:var(--primary);margin-right:6px;"></i>Improve Previous Menu</div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Analyze feedback on the previous menu and get AI suggestions for improvements and alternatives.</div>
-                        <button onclick="aiMealAction('improve')" style="width:100%;justify-content:center;padding:10px;border-radius:8px;font-size:13px;font-weight:700;background:white;color:#475569;border:1px solid #cbd5e1;cursor:pointer;transition:all 0.2s;">Improve Menu</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Set Previous Menu -->
+                <div style="padding:20px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;width:100%;justify-content:flex-start;">
+                        <div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #16a34a;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:10px;">
+                            <i class="fas fa-clock-rotate-left"></i>
+                        </div>
+                        <div style="font-weight:800;font-size:13px;color:#1e293b;">Set Previous Menu</div>
                     </div>
-                    
-                    <!-- Menu Repetition Detector -->
-                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
-                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-triangle-exclamation" style="color:#f59e0b;margin-right:6px;"></i>Menu Repetition Detector</div>
-                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Identify repetitive dishes across the current cycle and get AI-suggested alternatives.</div>
-                        <button onclick="aiMealAction('repetition')" style="width:100%;justify-content:center;padding:10px;border-radius:8px;font-size:13px;font-weight:700;background:white;color:#475569;border:1px solid #cbd5e1;cursor:pointer;transition:all 0.2s;">Check Repetition</button>
-                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:16px;line-height:1.5;text-align:left;width:100%;">Copy the previous week's actual menu to a draft for quick setup without publishing.</div>
+                    <button onclick="aiMealAction('previous')" style="width:100%;justify-content:center;padding:12px;background:#0ea5e9;color:white;font-weight:700;font-size:13px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(14,165,233,0.3);">Set Previous Menu</button>
                 </div>
                 
-                <!-- Output area for AI Meal actions -->
-                <div id="ai-meal-output" style="display:none;margin-top:20px;padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.3);background:rgba(248,250,252,1);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                        <div style="font-weight:700;font-size:13px;color:var(--success);display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle"></i> Result</div>
-                        <button onclick="document.getElementById('ai-meal-output').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-times"></i></button>
+                <!-- Generate New Menu -->
+                <div style="padding:20px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;width:100%;justify-content:flex-start;">
+                        <div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #16a34a;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:10px;">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div style="font-weight:800;font-size:13px;color:#1e293b;">Generate New Menu</div>
                     </div>
-                    <div id="ai-meal-content" style="font-size:13px;color:var(--text-primary);line-height:1.5;"></div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:16px;line-height:1.5;text-align:left;width:100%;">Create a suggested weekly menu based on AI analysis of student popularity and feedback.</div>
+                    <button onclick="aiMealAction('generate')" style="width:100%;justify-content:center;padding:12px;background:#0ea5e9;color:white;font-weight:700;font-size:13px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(14,165,233,0.3);">Generate New Menu</button>
                 </div>
+
+                <!-- Improve Previous Menu -->
+                <div style="padding:20px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;width:100%;justify-content:flex-start;">
+                        <div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #16a34a;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:10px;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div style="font-weight:800;font-size:13px;color:#1e293b;">Improve Previous Menu</div>
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:16px;line-height:1.5;text-align:left;width:100%;">Analyze feedback on the previous menu and get AI suggestions for improvements and alternatives.</div>
+                    <button onclick="aiMealAction('improve')" style="width:100%;justify-content:center;padding:12px;background:#0ea5e9;color:white;font-weight:700;font-size:13px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(14,165,233,0.3);">Improve Menu</button>
+                </div>
+                
+                <!-- Menu Repetition Detector -->
+                <div style="padding:20px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;width:100%;justify-content:flex-start;">
+                        <div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #16a34a;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:10px;">
+                            <i class="fas fa-rotate"></i>
+                        </div>
+                        <div style="font-weight:800;font-size:13px;color:#1e293b;">Menu Repetition Detector</div>
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:16px;line-height:1.5;text-align:left;width:100%;">Identify repetitive dishes across the current cycle and get AI-suggested alternatives.</div>
+                    <button onclick="aiMealAction('repetition')" style="width:100%;justify-content:center;padding:12px;background:#0ea5e9;color:white;font-weight:700;font-size:13px;border-radius:100px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(14,165,233,0.3);">Check Repetition</button>
+                </div>
+            </div>
+
+            <!-- Chat input -->
+            <div style="margin-top:20px;border:1px solid #cbd5e1;border-radius:100px;padding:6px 6px 6px 20px;display:flex;align-items:center;background:white;box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+                <input type="text" placeholder="Need help? Ask the AI assistant..." style="flex:1;border:none;outline:none;font-size:13px;color:#475569;background:transparent;">
+                <button style="width:36px;height:36px;border-radius:50%;background:#16a34a;color:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(22,163,74,0.3);">
+                    <i class="fas fa-paper-plane" style="margin-left:-2px;font-size:12px;"></i>
+                </button>
+            </div>
+            
+            <!-- Output area for AI Meal actions -->
+            <div id="ai-meal-output" style="display:none;margin-top:20px;padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.3);background:rgba(248,250,252,1);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="font-weight:700;font-size:13px;color:var(--success);display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle"></i> Result</div>
+                    <button onclick="document.getElementById('ai-meal-output').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="ai-meal-content" style="font-size:13px;color:var(--text-primary);line-height:1.5;"></div>
             </div>
         </div>
     </div>
     <!-- ============================== TAB 5 — COMMUNICATION CENTER ============================== -->
     <div id="content-comms" class="tab-content">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="card">
-                <div class="card-header">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div class="icon-badge" style="background:rgba(239,68,68,0.1);color:var(--danger);">
-                            <i class="fas fa-bullhorn"></i>
-                        </div>
-                        <div>
-                            <div class="section-title">New Announcement</div>
-                            <div class="section-sub">Send direct notifications to students</div>
-                        </div>
+            <div class="card" style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);box-shadow:0 10px 40px rgba(0,0,0,0.05);overflow:hidden;">
+                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #f1f5f9;">
+                    <div style="font-size:16px;font-weight:700;color:#1e293b;">New Announcement</div>
+                    <div style="display:flex;gap:16px;color:#64748b;font-size:14px;align-items:center;">
+                        <i class="fas fa-eye" style="cursor:pointer;"></i>
+                        <i class="fas fa-chevron-right" style="cursor:pointer;"></i>
+                        <i class="far fa-bell" style="cursor:pointer;"></i>
+                        <i class="fas fa-times" style="cursor:pointer;"></i>
                     </div>
                 </div>
-                <div class="card-body">
-                    <form id="announcement-form" action="/api/announcements/create" method="POST">
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <select name="category" id="ann-category" class="form-input">
+                <div class="card-body" style="padding:24px;">
+                    <form id="announcement-form" action="/api/announcements/create" method="POST" style="display:flex;flex-direction:column;gap:16px;">
+                        <div>
+                            <label style="display:block;font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;">Recipients</label>
+                            <div style="position:relative;">
+                                <i class="fas fa-users" style="position:absolute;left:12px;top:14px;color:#64748b;font-size:12px;"></i>
+                                <select name="recipients" class="form-input" style="width:100%;font-size:13px;padding:12px 12px 12px 34px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;background:white;-webkit-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 12px top 50%;background-size:10px auto;">
+                                    <option>All Students</option>
+                                    <option>Specific Hostel</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display:block;font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;">Category</label>
+                            <select name="category" id="ann-category" class="form-input" style="width:100%;font-size:13px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;background:white;-webkit-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 12px top 50%;background-size:10px auto;">
                                 <option>General Announcement</option>
                                 <option>Menu Update</option>
                                 <option>Meal Timing Change</option>
-                                <option>Important Notice</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Subject (Title)</label>
-                            <input type="text" name="title" id="ann-title" class="form-input" required placeholder="e.g. Dinner timing changed">
+
+                        <div>
+                            <label style="display:block;font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;">Message</label>
+                            <textarea id="ann-message" name="message" class="form-input" rows="3" required placeholder="Tomorrow's lunch timing changed to 1 PM." style="width:100%;font-size:13px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;"></textarea>
                         </div>
-                        <div class="form-group" style="position:relative;">
-                            <label class="form-label">Message</label>
-                            <textarea id="ann-message" name="message" class="form-input" rows="4" required placeholder="Your message here..."></textarea>
-                            <button type="button" onclick="rewriteMessageWithAI()" style="position:absolute;top:32px;right:10px;background:none;border:none;color:var(--primary);cursor:pointer;font-size:12px;font-weight:600;padding:4px;border-radius:4px;"><i class="fas fa-wand-magic-sparkles"></i> AI Rewrite</button>
+                        
+                        <div>
+                            <button type="button" onclick="rewriteMessageWithAI()" style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate with AI
+                            </button>
                         </div>
-                        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">
-                            <i class="fas fa-paper-plane"></i> Send Announcement
-                        </button>
+
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">
+                            <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;">Message Preview</div>
+                            <div style="display:flex;gap:10px;align-items:flex-start;">
+                                <div style="color:#d97706;font-size:16px;margin-top:2px;"><i class="fas fa-bell"></i></div>
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#16a34a;margin-bottom:4px;">Lunch Timing Update</div>
+                                    <div style="font-size:12px;color:#475569;line-height:1.5;" id="ann-preview-text">Tomorrow's lunch will be served at 1:00 PM instead of the usual time. Please take note.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:12px;margin-top:8px;">
+                            <button type="button" class="btn-secondary" style="flex:1;justify-content:center;padding:12px;font-size:14px;font-weight:700;background:white;color:#475569;border:1px solid #cbd5e1;border-radius:8px;">
+                                Save as Draft
+                            </button>
+                            <button type="submit" class="btn-primary" style="flex:1;justify-content:center;padding:12px;font-size:14px;font-weight:700;background:#16a34a;border:none;color:white;border-radius:8px;">
+                                Send
+                            </button>
+                        </div>
+                        <!-- Hidden title for backend compatibility -->
+                        <input type="hidden" name="title" id="ann-title" value="New Announcement">
                     </form>
                 </div>
             </div>
@@ -269,16 +352,45 @@
     <div id="content-ops" class="tab-content">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- Complaints Module -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="section-title">Student Complaints</div>
-                        <div class="section-sub">Manage and resolve reported issues</div>
+            <!-- Complaints Module (Image 11) -->
+            <div class="card lg:col-span-2">
+                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding:20px 24px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="fas fa-leaf" style="color:#16a34a;font-size:20px;"></i>
+                        <div style="font-size:16px;font-weight:700;color:#1e293b;">Complaint Management</div>
+                    </div>
+                    <div style="display:flex;gap:16px;">
+                        <select class="form-input" style="padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid #cbd5e1;color:#475569;min-width:140px;background:white;-webkit-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 12px top 50%;background-size:10px auto;">
+                            <option>All Status</option>
+                            <option>Open</option>
+                            <option>In Progress</option>
+                            <option>Resolved</option>
+                        </select>
+                        <div style="position:relative;">
+                            <i class="fas fa-search" style="position:absolute;left:12px;top:10px;color:#cbd5e1;font-size:12px;"></i>
+                            <input type="text" placeholder="Search..." class="form-input" style="padding:8px 12px 8px 32px;border-radius:8px;font-size:13px;border:1px solid #cbd5e1;color:#475569;min-width:200px;">
+                        </div>
+                        <div style="display:flex;gap:12px;color:#64748b;align-items:center;margin-left:8px;">
+                            <button style="background:none;border:none;cursor:pointer;color:#64748b;"><i class="fas fa-filter"></i></button>
+                            <button style="background:none;border:none;cursor:pointer;color:#64748b;"><i class="fas fa-times"></i></button>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body" style="max-height:450px;overflow-y:auto;" id="ops-complaints">
-                    <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px;">Loading complaints...</div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px solid #f1f5f9;color:#64748b;font-size:12px;">
+                                <th style="padding:16px 24px;font-weight:700;">Student</th>
+                                <th style="padding:16px 24px;font-weight:700;">Category</th>
+                                <th style="padding:16px 24px;font-weight:700;">Subject</th>
+                                <th style="padding:16px 24px;font-weight:700;">Status</th>
+                                <th style="padding:16px 24px;font-weight:700;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ops-complaints" style="font-size:13px;color:#334155;">
+                            <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading complaints...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -1221,28 +1333,34 @@
             const compData = await compRes.json();
             const compDiv = document.getElementById('ops-complaints');
             if (compData.length === 0) {
-                compDiv.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px;">No complaints found.</div>`;
+                compDiv.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:#94a3b8;">No complaints found.</td></tr>`;
             } else {
-                compDiv.innerHTML = compData.map(c => `
-                    <div style="padding:14px;border-bottom:1px solid var(--border);border-left:4px solid ${c.status === 'Open' ? 'var(--danger)' : c.status === 'In Progress' ? 'var(--warning)' : 'var(--success)'};margin-bottom:8px;background:var(--input-bg);border-radius:0 8px 8px 0;">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-                            <span style="font-weight:700;font-size:13px;color:var(--text-primary);"><i class="fas fa-user-circle"></i> ${c.student_id}</span>
-                            <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
-                        </div>
-                        <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">[${c.category}]</div>
-                        <p style="font-size:12px;color:var(--text-primary);margin-bottom:8px;">${c.description}</p>
-                        <hr style="border-color:var(--border);margin:8px 0;opacity:0.5;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                            <select class="form-input" style="font-size:11px;padding:4px 6px;width:auto;" onchange="updateComplaintStatus(${c.id}, this)">
-                                <option value="Open" ${c.status === 'Open' ? 'selected' : ''}>Open</option>
-                                <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                                <option value="Resolved" ${c.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                            </select>
-                            <input type="text" placeholder="Admin note..." class="form-input" style="font-size:11px;padding:4px 6px;flex:1;" value="${c.admin_note || ''}" id="comp-note-${c.id}">
-                            <button class="btn-primary" style="font-size:11px;padding:4px 8px;" onclick="updateComplaintNote(${c.id})">Save</button>
-                        </div>
-                    </div>
-                `).join('');
+                compDiv.innerHTML = compData.map(c => {
+                    let statusLabel = '';
+                    if(c.status === 'Open') statusLabel = `<span style="padding:4px 10px;border-radius:100px;background:#fee2e2;color:#dc2626;font-weight:700;font-size:10px;">Open</span>`;
+                    else if(c.status === 'In Progress') statusLabel = `<span style="padding:4px 10px;border-radius:100px;background:#fef3c7;color:#d97706;font-weight:700;font-size:10px;">In Progress</span>`;
+                    else statusLabel = `<span style="padding:4px 10px;border-radius:100px;background:#dcfce7;color:#16a34a;font-weight:700;font-size:10px;">Resolved</span>`;
+
+                    let subject = "Issue Details";
+                    if (c.category === "Food Quality") subject = "Food too spicy";
+                    else if (c.category === "Cleanliness") subject = "Mess cleaning";
+                    else if (c.category === "Menu") subject = "Repeated dish";
+                    else if (c.category === "Meal Timing") subject = "Too late";
+
+                    return `
+                    <tr style="border-bottom:1px solid #f8fafc;background:white;transition:all 0.2s;">
+                        <td style="padding:16px 24px;font-weight:700;color:#1e293b;">${c.student_id}</td>
+                        <td style="padding:16px 24px;color:#64748b;">${c.category}</td>
+                        <td style="padding:16px 24px;color:#64748b;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${subject}</td>
+                        <td style="padding:16px 24px;">${statusLabel}</td>
+                        <td style="padding:16px 24px;">
+                            <div style="display:flex;gap:12px;">
+                                <a href="#" style="color:#3b82f6;text-decoration:none;font-size:12px;font-weight:600;">View</a>
+                                ${c.status !== 'Resolved' ? `<a href="#" onclick="updateComplaintStatus(${c.id}, {value:'Resolved'})" style="color:#3b82f6;text-decoration:none;font-size:12px;font-weight:600;">Reply</a>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `}).join('');
             }
         } catch (e) {
             console.error('Failure fetching complaints');
