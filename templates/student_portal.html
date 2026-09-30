@@ -76,19 +76,20 @@
                     <div style="display:flex;gap:8px;margin-bottom:10px;">
                         <button type="button" onclick="selectVote({{ menu.id }}, 'Yes')"
                             id="btn-yes-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.06);color:var(--success);transition:all 0.2s;font-family:'Inter',sans-serif;">
-                            ✅ Yes, Eating
+                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(16,185,129,0.5);background:white;color:var(--success);transition:all 0.2s;font-family:'Inter',sans-serif;">
+                            <i class="fas fa-check-circle" style="margin-right:6px;"></i>Coming
                         </button>
                         <button type="button" onclick="selectVote({{ menu.id }}, 'No')"
                             id="btn-no-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.06);color:var(--danger);transition:all 0.2s;font-family:'Inter',sans-serif;">
-                            👎 Will Skip
+                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(239,68,68,0.5);background:white;color:var(--danger);transition:all 0.2s;font-family:'Inter',sans-serif;">
+                            <i class="fas fa-times-circle" style="margin-right:6px;"></i>Not Coming
                         </button>
                     </div>
 
                     <input type="hidden" name="choice" id="choice-{{ menu.id }}">
 
                     <div id="reason-box-{{ menu.id }}" style="display:none;margin-bottom:10px;">
+                        <div style="font-size:11px;font-weight:600;margin-bottom:6px;color:var(--text-secondary);">If Not Coming, please select reason:</div>
                         <select class="form-input" id="reason-select-{{ menu.id }}" style="width:100%;font-size:13px;margin-bottom:6px;" onchange="toggleOtherReason({{ menu.id }})">
                             <option value="">Select Reason...</option>
                             <option value="Don't like the menu">Don't like the menu</option>
@@ -98,11 +99,11 @@
                         </select>
                         <input type="hidden" name="reason" id="reason-{{ menu.id }}">
                         <textarea id="reason-other-{{ menu.id }}" rows="2" class="form-input"
-                            placeholder="Specify other reason..." style="display:none;width:100%;font-size:13px;" oninput="updateReasonField({{ menu.id }})"></textarea>
+                            placeholder="Enter custom reason..." style="display:none;width:100%;font-size:13px;" oninput="updateReasonField({{ menu.id }})"></textarea>
                     </div>
 
                     <button type="submit" id="submit-btn-{{ menu.id }}" style="display:none;width:100%;" class="btn-primary" style="justify-content:center;padding:11px;margin-top:4px;">
-                        <i class="fas fa-paper-plane"></i> Submit Vote
+                        I Will Skip
                     </button>
                 </form>
                 {% endif %}
@@ -298,6 +299,54 @@
     }
 
     let studentSessionId = 'student_' + Math.random().toString(36).substr(2, 9);
+    
+    // ===== VOTE LOGIC =====
+    function selectVote(menuId, choice) {
+        document.getElementById('choice-' + menuId).value = choice;
+        const btnYes = document.getElementById('btn-yes-' + menuId);
+        const btnNo = document.getElementById('btn-no-' + menuId);
+        const submitBtn = document.getElementById('submit-btn-' + menuId);
+        const reasonBox = document.getElementById('reason-box-' + menuId);
+
+        // Reset styling
+        btnYes.style.background = 'white';
+        btnNo.style.background = 'white';
+
+        if (choice === 'Yes') {
+            btnYes.style.background = 'rgba(16,185,129,0.1)';
+            reasonBox.style.display = 'none';
+            // Clear reason
+            document.getElementById('reason-' + menuId).value = '';
+            document.getElementById('reason-select-' + menuId).value = '';
+            document.getElementById('reason-other-' + menuId).style.display = 'none';
+            submitBtn.innerText = '✅ Submit Vote';
+            submitBtn.style.display = 'block';
+        } else if (choice === 'No') {
+            btnNo.style.background = 'rgba(239,68,68,0.1)';
+            reasonBox.style.display = 'block';
+            submitBtn.innerText = 'I Will Skip';
+            submitBtn.style.display = 'block';
+        }
+    }
+
+    function toggleOtherReason(menuId) {
+        const sel = document.getElementById('reason-select-' + menuId);
+        const otherInput = document.getElementById('reason-other-' + menuId);
+        const hiddenReason = document.getElementById('reason-' + menuId);
+        
+        if (sel.value === 'Other') {
+            otherInput.style.display = 'block';
+            hiddenReason.value = otherInput.value.trim();
+        } else {
+            otherInput.style.display = 'none';
+            hiddenReason.value = sel.value;
+        }
+    }
+
+    function updateReasonField(menuId) {
+        const otherInput = document.getElementById('reason-other-' + menuId);
+        document.getElementById('reason-' + menuId).value = otherInput.value.trim();
+    }
 
     function setStudentPrompt(text) {
         document.getElementById('student-chat-input').value = text;

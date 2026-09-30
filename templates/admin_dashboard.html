@@ -121,8 +121,62 @@
                 </div>
             </div>
         </div>
-    </div>
 
+        <!-- AI Meal Assistant Section -->
+        <div class="card" style="margin-top:24px;">
+            <div class="card-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <div class="section-title">AI Meal Assistant</div>
+                        <div class="section-sub">Smart menu generation and optimization</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Set Previous Menu -->
+                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
+                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-history" style="color:var(--primary);margin-right:6px;"></i>Set Previous Menu</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Copy the previous week's actual menu to a draft for quick setup without publishing.</div>
+                        <button onclick="aiMealAction('previous')" class="btn-primary" style="width:100%;justify-content:center;box-shadow:none;">Set Previous Menu</button>
+                    </div>
+                    
+                    <!-- Generate New Menu -->
+                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
+                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-fire-burner" style="color:var(--primary);margin-right:6px;"></i>Generate New Menu</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Create a suggested weekly menu based on AI analysis of student popularity and feedback.</div>
+                        <button onclick="aiMealAction('generate')" class="btn-primary" style="width:100%;justify-content:center;box-shadow:none;">Generate New Menu</button>
+                    </div>
+
+                    <!-- Improve Previous Menu -->
+                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
+                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-arrow-trend-up" style="color:var(--primary);margin-right:6px;"></i>Improve Previous Menu</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Analyze feedback on the previous menu and get AI suggestions for improvements and alternatives.</div>
+                        <button onclick="aiMealAction('improve')" class="btn-secondary" style="width:100%;justify-content:center;box-shadow:none;">Improve Menu</button>
+                    </div>
+                    
+                    <!-- Menu Repetition Detector -->
+                    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);">
+                        <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:4px;"><i class="fas fa-triangle-exclamation" style="color:var(--warning);margin-right:6px;"></i>Menu Repetition Detector</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4;">Identify repetitive dishes across the current cycle and get AI-suggested alternatives.</div>
+                        <button onclick="aiMealAction('repetition')" class="btn-secondary" style="width:100%;justify-content:center;box-shadow:none;">Check Repetition</button>
+                    </div>
+                </div>
+                
+                <!-- Output area for AI Meal actions -->
+                <div id="ai-meal-output" style="display:none;margin-top:20px;padding:16px;border-radius:12px;border:1px solid var(--primary-light);background:rgba(16,185,129,0.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <div style="font-weight:700;font-size:13px;color:var(--primary);"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Result</div>
+                        <button onclick="document.getElementById('ai-meal-output').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="ai-meal-content" style="font-size:13px;color:var(--text-primary);line-height:1.5;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- ============================== TAB 5 — COMMUNICATION CENTER ============================== -->
     <div id="content-comms" class="tab-content">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -796,6 +850,31 @@
         document.getElementById('content-waste').style.display = 'block';
         loadWasteAnalytics(); 
     });
+
+    async function aiMealAction(actionType) {
+        const outDiv = document.getElementById('ai-meal-output');
+        const contentDiv = document.getElementById('ai-meal-content');
+        
+        outDiv.style.display = 'block';
+        contentDiv.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><i class="fas fa-spinner fa-spin" style="color:var(--primary);"></i> AI is processing your request...</div>';
+        
+        try {
+            const res = await fetch('/api/ai_meal_assistant', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: actionType })
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                contentDiv.innerHTML = `<span style="color:var(--danger);"><i class="fas fa-circle-xmark" style="margin-right:6px;"></i>${data.error}</span>`;
+            } else {
+                contentDiv.innerHTML = marked.parse(data.result);
+            }
+        } catch (e) {
+            contentDiv.innerHTML = `<span style="color:var(--danger);"><i class="fas fa-circle-exclamation" style="margin-right:6px;"></i>Connection error. Please try again later.</span>`;
+        }
+    }
 
     /* ===== COMMUNICATION CENTER ===== */
     async function fetchAnnouncements() {

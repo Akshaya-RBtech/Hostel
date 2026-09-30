@@ -574,6 +574,49 @@ def predict_quantity():
     )
     return jsonify({'prediction': round(prediction, 2)})
 
+@app.route('/api/ai_meal_assistant', methods=['POST'])
+@login_required
+def ai_meal_assistant():
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    data = request.json
+    action = data.get('action')
+    
+    if not GEMINI_API_KEY:
+        return jsonify({'error': 'Gemini API not configured. Cannot perform AI action.'})
+        
+    try:
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        
+        menus = MenuEntry.query.order_by(MenuEntry.date.desc()).limit(14).all()
+        menu_text = "\n".join([f"{m.date} - {m.meal_type}: {m.items}" for m in menus]) if menus else "No recent menus available in the database."
+        
+        if action == 'previous':
+            prompt = f"Given these recent menus:\n{menu_text}\n\nGroup them logically into a weekly structure that an Admin can copy-paste to set as next week's draft. Use markdown tables."
+            result = model.generate_content(prompt).text
+        
+        elif action == 'generate':
+            prompt = f"Act as a professional hostel menu planner. Given our recent history:\n{menu_text}\n\nGenerate a brand new, highly nutritious, and exciting 7-day menu (Breakfast, Lunch, Dinner). Avoid heavy repetition of these past dishes. Format the output elegantly in Markdown."
+            result = model.generate_content(prompt).text
+        
+        elif action == 'improve':
+            feedbacks = db.session.query(Vote).filter(Vote.choice == 'No').limit(20).all()
+            fb_text = "\n".join([f"Menu ID {f.menu_id}: student said '{f.reason}'" for f in feedbacks]) if feedbacks else "No negative feedback available."
+            prompt = f"Given past menus:\n{menu_text}\nAnd student negative feedback/skip reasons:\n{fb_text}\n\nSuggest 3-5 highly concrete improvements to the menu to boost student attendance. Format beautifully in Markdown."
+            result = model.generate_content(prompt).text
+            
+        elif action == 'repetition':
+            prompt = f"Analyze these recent menus for repetitive ingredients or exactly repeated dishes over a short span:\n{menu_text}\n\nList the repetitions found and provide 3 alternative dish recommendations for each highlighted repetition. Format in Markdown."
+            result = model.generate_content(prompt).text
+            
+        else:
+            return jsonify({'error': 'Unknown action'})
+            
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': f"AI processing failed: {str(e)}"})
+
 # --- Announcements & Notifications ---
 @app.route('/api/announcements', methods=['GET'])
 @login_required

@@ -772,15 +772,21 @@
            RESPONSIVE
            =========================== */
         @media (max-width: 900px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .main-wrapper { margin-left: 0; width: 100%; }
+            .sidebar { transform: translateX(-100%); display: none; }
+            .sidebar.open { transform: translateX(0); display: block; }
+            .main-wrapper { margin-left: 0; width: 100%; padding-bottom: 70px; } /* Space for bottom nav */
             .mobile-menu-btn { display: block; }
-            .page-wrapper { padding: 20px; }
-            .top-header { padding: 0 20px; }
+            .page-wrapper { padding: 16px; }
+            .top-header { padding: 0 16px; }
+            
+            /* Responsive tables */
+            .data-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
         
-        /* Overlay for mobile sidebar */
+        /* Overlay for mobile sidebar (Admin only on mobile) */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -790,6 +796,56 @@
             backdrop-filter: blur(4px);
         }
         .sidebar-overlay.open { display: block; }
+
+        /* ===========================
+           BOTTOM NAVIGATION (MOBILE)
+           =========================== */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--sidebar-bg);
+            border-top: 1px solid var(--sidebar-border);
+            z-index: 1000;
+            flex-direction: row;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: env(safe-area-inset-bottom, 8px);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .bottom-nav-item i {
+            font-size: 20px;
+        }
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav-item.active i {
+            background: rgba(16,185,129,0.15);
+            padding: 6px 14px;
+            border-radius: 12px;
+        }
+        @media (max-width: 900px) {
+            .bottom-nav.visible-mobile {
+                display: flex;
+            }
+        }
     </style>
 
 </head>
@@ -935,6 +991,49 @@
                 {% block content %}{% endblock %}
             </main>
 
+            <!-- Bottom Navigation for Mobile -->
+            {% if current_user.is_authenticated %}
+            <nav class="bottom-nav visible-mobile">
+                {% if current_user.role == 'student' %}
+                <a class="bottom-nav-item active" onclick="switchDashboardTab(event, 'home')">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'calendar')">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>Calendar</span>
+                </a>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'complaints')">
+                    <i class="fas fa-flag"></i>
+                    <span>Report</span>
+                </a>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'agent')">
+                    <i class="fas fa-robot"></i>
+                    <span>Agent</span>
+                </a>
+                {% else %}
+                <!-- Admin Mobile Nav -->
+                <a class="bottom-nav-item active" onclick="switchDashboardTab(event, 'overview')">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dash</span>
+                </a>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'menu')">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Menu</span>
+                </a>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'ai')">
+                    <i class="fas fa-brain"></i>
+                    <span>AI</span>
+                </a>
+                <!-- Admin More menu opens sidebar on mobile -->
+                <a class="bottom-nav-item" onclick="toggleSidebar()">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <span>More</span>
+                </a>
+                {% endif %}
+            </nav>
+            {% endif %}
+
     {% if current_user.is_authenticated %}
         </div>
     </div>
@@ -948,7 +1047,12 @@
             e.preventDefault();
             // Remove active from all nav items
             document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
+            // Remove active from any bottom nav item that might be active
+            document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+            
             e.currentTarget.classList.add('active');
+            
+            // Sync active state between sidebar and bottom nav (by matching inner text span/i or just ignoring visual sync for now and relying on user clicks)
             
             // This expects child templates to have a function 'activateTab(tabId)'
             if (typeof activateTab === 'function') {
