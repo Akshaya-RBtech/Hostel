@@ -852,13 +852,23 @@
         </aside>
 
         <div class="main-wrapper">
+    {% endif %}
+
             <!-- ===== TOP HEADER ===== -->
             <header class="top-header">
+                {% if current_user.is_authenticated %}
                 <button class="mobile-menu-btn" onclick="toggleSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
+                {% else %}
+                <a href="/" class="header-brand">
+                    <div class="brand-icon"><i class="fas fa-leaf"></i></div>
+                    <div class="brand-name">WasteZero</div>
+                </a>
+                {% endif %}
+                
                 <div class="header-right">
-                    {% if current_user.role == 'student' %}
+                    {% if current_user.is_authenticated and current_user.role == 'student' %}
                     <!-- Notification Bell -->
                     <div class="theme-dropdown-container" id="notif-container">
                         <button class="theme-dropdown-btn" id="notif-toggle-btn" onclick="toggleNotifMenu()" aria-label="Notifications" style="position:relative;padding:8px;border-radius:50%;border:none;background:rgba(16,185,129,0.1);">
@@ -892,6 +902,7 @@
                         </div>
                     </div>
 
+                    {% if current_user.is_authenticated %}
                     <div class="header-user">
                         <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
                         <span class="user-name-text">{{ current_user.username }}</span>
@@ -900,10 +911,19 @@
                         <i class="fas fa-arrow-right-from-bracket"></i>
                         <span class="hide-mobile">Logout</span>
                     </a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-secondary" style="text-decoration:none;"><i class="fas fa-user-shield"></i> <span class="hide-mobile">Admin</span></a>
+                    <a href="{{ url_for('student_login') }}" class="btn-primary" style="text-decoration:none;"><i class="fas fa-graduation-cap"></i> <span class="hide-mobile">Portal</span></a>
+                    {% endif %}
+
                 </div>
             </header>
 
             <main class="page-wrapper fade-in">
+                {% if not current_user.is_authenticated %}
+                    {% block public_content %}{% endblock %}
+                {% endif %}
+
                 {% with messages = get_flashed_messages() %}
                   {% if messages %}
                     {% for message in messages %}
@@ -914,8 +934,11 @@
 
                 {% block content %}{% endblock %}
             </main>
+
+    {% if current_user.is_authenticated %}
         </div>
     </div>
+    
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -935,22 +958,6 @@
             if(window.innerWidth <= 900) toggleSidebar();
         }
     </script>
-    {% else %}
-    <!-- Public / Auth Screens without Sidebar -->
-    <header class="top-header">
-        <a href="/" class="header-brand">
-            <div class="brand-icon"><i class="fas fa-leaf"></i></div>
-            <div class="brand-name">WasteZero</div>
-        </a>
-        <div class="header-right">
-            <a href="{{ url_for('login') }}" class="btn-secondary" style="text-decoration:none;"><i class="fas fa-user-shield"></i> <span class="hide-mobile">Admin</span></a>
-            <a href="{{ url_for('student_login') }}" class="btn-primary" style="text-decoration:none;"><i class="fas fa-graduation-cap"></i> <span class="hide-mobile">Portal</span></a>
-        </div>
-    </header>
-    <main class="page-wrapper fade-in">
-        {% block public_content %}{% endblock %}
-        {% block content %}{% endblock %}
-    </main>
     {% endif %}
 
     <!-- ===== FOOTER ===== -->
