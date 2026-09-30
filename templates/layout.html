@@ -827,6 +827,73 @@
             max-width: 800px;
             margin: 0 auto;
         }
+
+        /* ── MOBILE NAVIGATION DRAWER ── */
+        .mobile-drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .mobile-drawer {
+            position: fixed;
+            top: 0; left: -300px;
+            width: 280px; height: 100vh;
+            background: #ffffff;
+            z-index: 2001;
+            transition: left 0.3s ease;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .mobile-drawer.open {
+            left: 0;
+        }
+        .drawer-header {
+            padding: 24px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .drawer-links {
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer-link {
+            padding: 14px 24px;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .drawer-link i {
+            width: 20px;
+            color: #64748b;
+            font-size: 18px;
+            text-align: center;
+        }
+        .drawer-link:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+        .drawer-link:hover i {
+            color: var(--primary);
+        }
     </style>
 
 </head>
@@ -837,17 +904,74 @@
 
             <!-- ===== TOP HEADER ===== -->
             <header class="top-header">
-                {% if current_user.is_authenticated %}
-                <a href="/" class="header-brand" style="text-decoration:none;gap:12px;">
-                    <div class="brand-icon" style="background:rgba(255,255,255,0.2);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i class="fas fa-leaf" style="font-size:16px;"></i></div>
-                    <div class="brand-name" style="color:white;font-weight:800;font-size:18px;letter-spacing:-0.5px;">WasteZero</div>
-                </a>
-                {% else %}
-                <a href="/" class="header-brand" style="text-decoration:none;gap:12px;">
-                    <div class="brand-icon" style="background:rgba(255,255,255,0.2);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i class="fas fa-leaf" style="font-size:16px;"></i></div>
-                    <div class="brand-name" style="color:white;font-weight:800;font-size:18px;letter-spacing:-0.5px;">WasteZero</div>
-                </a>
-                {% endif %}
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <button id="menu-drawer-btn" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    {% if current_user.is_authenticated %}
+                    <a href="/" class="header-brand" style="text-decoration:none;gap:12px;">
+                        <div class="brand-icon" style="background:rgba(255,255,255,0.2);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i class="fas fa-leaf" style="font-size:16px;"></i></div>
+                        <div class="brand-name" style="color:white;font-weight:800;font-size:18px;letter-spacing:-0.5px;">WasteZero</div>
+                    </a>
+                    {% else %}
+                    <a href="/" class="header-brand" style="text-decoration:none;gap:12px;">
+                        <div class="brand-icon" style="background:rgba(255,255,255,0.2);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;"><i class="fas fa-leaf" style="font-size:16px;"></i></div>
+                        <div class="brand-name" style="color:white;font-weight:800;font-size:18px;letter-spacing:-0.5px;">WasteZero</div>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- ===== NAVIGATION DRAWER ===== -->
+                <div class="mobile-drawer-overlay" id="mobile-drawer-overlay"></div>
+                <div class="mobile-drawer" id="mobile-drawer">
+                    <div class="drawer-header">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <i class="fas fa-leaf" style="font-size:24px;"></i>
+                            <div>
+                                <div style="font-weight:800;font-size:18px;">WasteZero</div>
+                                <div style="font-size:12px;opacity:0.8;font-weight:500;">
+                                    {% if current_user.is_authenticated %}
+                                        {{ current_user.full_name or current_user.username }} ({{ current_user.role|title }})
+                                    {% else %}
+                                        Guest
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drawer-links">
+                        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-utensils"></i> Menu Management</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-calendar-week"></i> Weekly Meal Calendar</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-users-viewfinder"></i> Attendance Tracker</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-brain"></i> AI Meal Assistant</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-recycle"></i> Menu Repetition Detector</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-chart-line"></i> Dish Analytics</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-leaf"></i> Food Waste Tracking</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-box"></i> Inventory Stock</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-envelope-open-text"></i> Leave Requests</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-exclamation-triangle"></i> Complaints</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-bullhorn"></i> Communications</a>
+                        <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;margin-top:24px;border-top:1px solid #f1f5f9;border-radius:0;"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> Logout</a>
+
+                        {% elif current_user.is_authenticated and current_user.role == 'student' %}
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-home"></i> Home Dashboard</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-calendar-alt"></i> Weekly Schedule</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-check-circle"></i> Meal Attendance</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-comment-dots"></i> Student AI Assistant</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-envelope-open"></i> Leave Request</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-exclamation-circle"></i> Submit Complaint</a>
+                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-cog"></i> Profile & Settings</a>
+                        <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;margin-top:24px;border-top:1px solid #f1f5f9;border-radius:0;"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> Logout</a>
+                        
+                        {% else %}
+                        <a href="/" class="drawer-link"><i class="fas fa-home"></i> Home</a>
+                        <a href="{{ url_for('login') }}" class="drawer-link"><i class="fas fa-lock"></i> Admin Login</a>
+                        <a href="{{ url_for('student_login') }}" class="drawer-link"><i class="fas fa-user-graduate"></i> Student Login</a>
+                        {% endif %}
+                    </div>
+                </div>
                 
                 <div class="header-right" style="display:flex;align-items:center;gap:16px;">
                     {% if current_user.is_authenticated %}
@@ -1100,6 +1224,23 @@
         if (document.getElementById('notif-badge')) {
             fetchNotifications();
             setInterval(fetchNotifications, 20000); // refresh every 20s
+        }
+    </script>
+    <script>
+        // Drawer toggle logic
+        const menuBtn = document.getElementById('menu-drawer-btn');
+        const overlay = document.getElementById('mobile-drawer-overlay');
+        const drawer = document.getElementById('mobile-drawer');
+        
+        if(menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                drawer.classList.add('open');
+                overlay.classList.add('open');
+            });
+            overlay.addEventListener('click', () => {
+                drawer.classList.remove('open');
+                overlay.classList.remove('open');
+            });
         }
     </script>
 </body>

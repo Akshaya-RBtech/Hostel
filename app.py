@@ -15,6 +15,10 @@ from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AI
 from ai_engine import WasteAnalyticsAI
 from datetime import datetime, timedelta
 
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+
 app = Flask(__name__)
 from services.firebase_service import init_firebase, verify_id_token, get_firebase_config
 from services.rag_service import rag_index
@@ -280,23 +284,31 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':
-        return render_template('login.html', type='Admin')
+    if request.method == 'POST':
+        flash('Please enable JavaScript to login securely.', 'error')
+        return redirect(url_for('login'))
+    return render_template('login.html', type='Admin')
 
 @app.route('/admin/setup', methods=['GET', 'POST'])
 def admin_setup():
-    if request.method == 'GET':
-        return render_template('register.html', type='Admin')
+    if request.method == 'POST':
+        flash('Please enable JavaScript to register.', 'error')
+        return redirect(url_for('admin_setup'))
+    return render_template('register.html', type='Admin')
 
 @app.route('/student/register', methods=['GET', 'POST'])
 def student_register():
-    if request.method == 'GET':
-        return render_template('register.html', type='Student')
+    if request.method == 'POST':
+        flash('Please enable JavaScript to register.', 'error')
+        return redirect(url_for('student_register'))
+    return render_template('register.html', type='Student')
 
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
-    if request.method == 'GET':
-        return render_template('login.html', type='Student')
+    if request.method == 'POST':
+        flash('Please enable JavaScript to login securely.', 'error')
+        return redirect(url_for('student_login'))
+    return render_template('login.html', type='Student')
 
 # ── Firebase Config Endpoint ──
 @app.route('/api/firebase-config')
@@ -593,7 +605,7 @@ def ai_meal_assistant():
         return jsonify({'error': 'Gemini API not configured. Cannot perform AI action.'})
         
     try:
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         menus = MenuEntry.query.order_by(MenuEntry.date.desc()).limit(14).all()
         menu_text = "\n".join([f"{m.date} - {m.meal_type}: {m.items}" for m in menus]) if menus else "No recent menus available in the database."
@@ -821,13 +833,13 @@ def update_leave(leave_id):
             # Look up menus in range
             menus = MenuEntry.query.filter_by(date=date_str, published=True).all()
             for m in menus:
-                # Mark as 'no' for attendance
-                v = Vote.query.filter_by(student_id=leave.student_id, date=date_str, meal_type=m.meal_type).first()
+                v = Vote.query.filter_by(student_id=leave.student_id, menu_id=m.id).first()
                 if not v:
-                    v = Vote(student_id=leave.student_id, date=date_str, meal_type=m.meal_type)
+                    v = Vote(student_id=leave.student_id, menu_id=m.id, choice='No', reason='Approved Hostel Leave')
                     db.session.add(v)
-                v.vote = 'no'
-                v.skip_reason = 'Approved Hostel Leave'
+                else:
+                    v.choice = 'No'
+                    v.reason = 'Approved Hostel Leave'
             curr_date += delta
         db.session.commit()
         
