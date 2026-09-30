@@ -9,32 +9,7 @@
             <h1 style="font-size:24px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px;">Admin Dashboard</h1>
             <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">AI-powered food waste management &amp; analytics platform</p>
         </div>
-        <div style="display:flex;gap:8px;background:var(--card-bg);padding:5px;border-radius:14px;border:1px solid var(--border);overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;width:100%;">
-            <button onclick="switchTab('menu')"     id="tab-menu"      class="dash-tab active-tab flex-shrink-0">
-                <i class="fas fa-calendar-alt"></i> Menu Planning
-            </button>
-            <button onclick="switchTab('ai')"       id="tab-ai"        class="dash-tab">
-                <i class="fas fa-robot"></i> AI Prediction
-            </button>
-            <button onclick="switchTab('analytics')" id="tab-analytics" class="dash-tab">
-                <i class="fas fa-chart-bar"></i> Dish Analytics
-            </button>
-            <button onclick="switchTab('waste')"    id="tab-waste"     class="dash-tab">
-                <i class="fas fa-recycle"></i> Consumption &amp; Waste
-            </button>
-            <button onclick="switchTab('comms')"    id="tab-comms"     class="dash-tab">
-                <i class="fas fa-bullhorn"></i> Communication
-            </button>
-            <button onclick="switchTab('ops')"      id="tab-ops"       class="dash-tab">
-                <i class="fas fa-cogs"></i> Student Operations
-            </button>
-            <button onclick="switchTab('inventory')" id="tab-inventory" class="dash-tab">
-                <i class="fas fa-boxes"></i> Inventory
-            </button>
-            <button onclick="switchTab('agent')"    id="tab-agent"     class="dash-tab flex-shrink-0">
-                <i class="fas fa-brain"></i> AI Assistant
-            </button>
-        </div>
+            <!-- Tabs are now managed by the sidebar in layout.html -->
     </div>
 
     <style>
@@ -788,19 +763,39 @@
 </style>
 
 <script>
-    /* ===== TAB SWITCHER ===== */
-    function switchTab(tab) {
+    /* ===== TAB SWITCHER (Sidebar Integration) ===== */
+    function activateTab(tab) {
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.dash-tab').forEach(el => el.classList.remove('active-tab'));
-        document.getElementById('content-' + tab).style.display = 'block';
-        document.getElementById('tab-' + tab).classList.add('active-tab');
-        if (tab === 'analytics') loadAnalytics();
-        if (tab === 'waste') loadWasteAnalytics();
-        if (tab === 'comms') fetchAnnouncements();
-        if (tab === 'ops') fetchOperationsData();
-        if (tab === 'inventory') fetchInventory();
-        if (tab === 'agent') { loadAIInsights(); loadAIReports(); }
+        
+        // Map sidebar tab ids to content section ids
+        let contentId;
+        switch(tab) {
+            case 'overview': contentId = 'content-waste'; break; // Use Waste as overview for now
+            case 'menu': contentId = 'content-menu'; break;
+            case 'ai': contentId = 'content-ai'; break;
+            case 'ops': contentId = 'content-ops'; break;
+            case 'inventory': contentId = 'content-inventory'; break;
+            case 'comms': contentId = 'content-comms'; break;
+            case 'agent': contentId = 'content-agent'; break;
+            default: contentId = 'content-' + tab;
+        }
+        
+        const contentEl = document.getElementById(contentId);
+        if (contentEl) contentEl.style.display = 'block';
+
+        if (contentId === 'content-analytics' || contentId === 'content-waste') loadWasteAnalytics();
+        if (contentId === 'content-comms') fetchAnnouncements();
+        if (contentId === 'content-ops') fetchOperationsData();
+        if (contentId === 'content-inventory') fetchInventory();
+        if (contentId === 'content-agent') { loadAIInsights(); loadAIReports(); }
     }
+    
+    // Initial Load setup (triggered from layout.html or by default)
+    document.addEventListener('DOMContentLoaded', () => {
+        // Defaults to 'waste' which acts as overview
+        document.getElementById('content-waste').style.display = 'block';
+        loadWasteAnalytics(); 
+    });
 
     /* ===== COMMUNICATION CENTER ===== */
     async function fetchAnnouncements() {

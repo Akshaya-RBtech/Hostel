@@ -52,12 +52,12 @@
            THEME CSS VARIABLES
            =========================== */
 
-        /* ── LIGHT THEME ── */
+        /* ── LIGHT THEME (Soft Green / Mint) ── */
         :root[data-theme="light"] {
-            --primary: #4f46e5;
-            --primary-dark: #3730a3;
-            --primary-light: #818cf8;
-            --accent: #06b6d4;
+            --primary: #10b981; /* Emerald green */
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --accent: #3b82f6; /* Subtle blue */
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -88,16 +88,16 @@
             --chart-grid: rgba(0,0,0,0.06);
         }
 
-        /* ── DARK THEME ── */
+        /* ── DARK THEME (Mint/Dark) ── */
         :root[data-theme="dark"] {
-            --primary: #818cf8;
-            --primary-dark: #4338ca;
-            --primary-light: #a5b4fc;
-            --accent: #22d3ee;
+            --primary: #34d399;
+            --primary-dark: #10b981;
+            --primary-light: #6ee7b7;
+            --accent: #60a5fa;
             --success: #34d399;
             --warning: #fbbf24;
             --danger: #f87171;
-            --sidebar-bg: #070b13;
+            --sidebar-bg: #0f172a;
             --sidebar-border: rgba(255,255,255,0.06);
             --card-bg: #0f172a;
             --body-bg: #030712;
@@ -192,20 +192,47 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 
         /* ===========================
-           TOP HEADER
+           LAYOUT STRUCTURE
            =========================== */
-        .top-header {
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 260px;
             background: var(--sidebar-bg);
-            border-bottom: 1px solid var(--sidebar-border);
-            height: 64px;
+            border-right: 1px solid var(--sidebar-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .main-wrapper {
+            flex: 1;
+            margin-left: 260px; /* space for sidebar */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── TOP HEADER ── */
+        .top-header {
+            background: rgba(var(--body-bg), 0.8);
+            height: 70px;
             display: flex;
             align-items: center;
-            padding: 0 24px;
+            padding: 0 32px;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
             backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
         }
 
         .header-brand {
@@ -231,17 +258,70 @@
         .brand-name {
             font-size: 20px;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--brand-gradient-from) 40%, var(--brand-gradient-to));
+            background: linear-gradient(135deg, var(--primary) 40%, var(--primary-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -0.5px;
         }
 
+        .sidebar-brand {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-item i { font-size: 18px; width: 24px; text-align: center; }
+        .nav-item:hover {
+            background: rgba(16, 185, 129, 0.08); /* Mint hover */
+            color: var(--primary);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Hamburger for mobile */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-left: auto;
         }
 
         /* ── Theme Selector Dropdown ── */
@@ -688,116 +768,190 @@
         /* ===========================
            RESPONSIVE
            =========================== */
-        @media (max-width: 768px) {
-            .page-wrapper { padding: 16px; width: 100%; max-width: 100vw; box-sizing: border-box; overflow-x: hidden; }
-            .top-header { padding: 0 16px; flex-wrap: nowrap; height: 60px; min-height: 60px; justify-content: space-between; }
-            .header-right { gap: 6px; }
-            .btn-primary span.hide-mobile, .btn-secondary span.hide-mobile { display: none; }
-            .btn-primary, .btn-secondary { padding: 8px 12px; }
-            .header-brand { margin: 0; }
-            .user-name-text { display: none; }
-            footer { padding: 12px 16px; }
+        /* ===========================
+           RESPONSIVE
+           =========================== */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; width: 100%; }
+            .mobile-menu-btn { display: block; }
+            .page-wrapper { padding: 20px; }
+            .top-header { padding: 0 20px; }
         }
+        
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.open { display: block; }
     </style>
 
 </head>
 <body>
-    <!-- ===== TOP HEADER ===== -->
+    {% if current_user.is_authenticated %}
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <a href="/" class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="brand-name">WasteZero</div>
+            </a>
+            <div class="sidebar-nav" id="sidebar-nav-container">
+                <!-- Navigation is injected via JS depending on role to avoid template engine duplication across child files -->
+                {% if current_user.role == 'admin' %}
+                    <a href="#" class="nav-item active" onclick="switchDashboardTab(event, 'overview')">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'menu')">
+                        <i class="fas fa-calendar-alt"></i> Menu Mgmt
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'ai')">
+                        <i class="fas fa-brain"></i> AI Prediction
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'ops')">
+                        <i class="fas fa-users-cog"></i> Ops & Leaves
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'inventory')">
+                        <i class="fas fa-boxes"></i> Inventory
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'comms')">
+                        <i class="fas fa-bullhorn"></i> Comms
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'agent')">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                {% else %}
+                    <a href="#" class="nav-item active" onclick="switchDashboardTab(event, 'home')">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'calendar')">
+                        <i class="fas fa-calendar-week"></i> Meal Calendar
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'complaints')">
+                        <i class="fas fa-flag"></i> Complaints
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'leaves')">
+                        <i class="fas fa-plane-departure"></i> Leave Form
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'agent')">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <!-- ===== TOP HEADER ===== -->
+            <header class="top-header">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-right">
+                    {% if current_user.role == 'student' %}
+                    <!-- Notification Bell -->
+                    <div class="theme-dropdown-container" id="notif-container">
+                        <button class="theme-dropdown-btn" id="notif-toggle-btn" onclick="toggleNotifMenu()" aria-label="Notifications" style="position:relative;padding:8px;border-radius:50%;border:none;background:rgba(16,185,129,0.1);">
+                            <i class="fas fa-bell" style="font-size:16px;color:var(--primary);"></i>
+                            <span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:var(--danger);color:white;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;align-items:center;justify-content:center;transform:translate(20%, -20%);">0</span>
+                        </button>
+                        <div class="theme-dropdown-menu" id="notif-menu" style="min-width:320px;right:-40px;">
+                            <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:13px;font-weight:700;">Notifications</span>
+                                <button onclick="readAllNotifs()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer;">Mark all read</button>
+                            </div>
+                            <div id="notif-list" style="max-height:300px;overflow-y:auto;background:var(--card-bg);border-radius:0 0 12px 12px;"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Theme Dropdown -->
+                    <div class="theme-dropdown-container" id="theme-container">
+                        <button class="theme-dropdown-btn" id="theme-toggle-btn" onclick="toggleThemeMenu()" aria-label="Theme Selector">
+                            <i class="fas fa-circle-half-stroke"></i>
+                            <span class="hide-mobile" id="theme-label">Theme</span>
+                            <i class="fas fa-chevron-down" style="font-size:9px;opacity:0.6;"></i>
+                        </button>
+                        <!-- Theme options are same as before -->
+                        <div class="theme-dropdown-menu" id="theme-menu">
+                            <button class="theme-option" data-theme="light" onclick="selectTheme('light')"><span class="theme-icon"><i class="fas fa-sun"></i></span> Light <i class="fas fa-check theme-check"></i></button>
+                            <button class="theme-option" data-theme="dark" onclick="selectTheme('dark')"><span class="theme-icon"><i class="fas fa-moon"></i></span> Dark <i class="fas fa-check theme-check"></i></button>
+                            <button class="theme-option" data-theme="dark-blue" onclick="selectTheme('dark-blue')"><span class="theme-icon"><i class="fas fa-water"></i></span> Dark Blue <i class="fas fa-check theme-check"></i></button>
+                            <div style="border-top:1px solid var(--border);margin:2px 0;"></div>
+                            <button class="theme-option" data-theme="system" onclick="selectTheme('system')"><span class="theme-icon"><i class="fas fa-desktop"></i></span> System <i class="fas fa-check theme-check"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="header-user">
+                        <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+                        <span class="user-name-text">{{ current_user.username }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span class="hide-mobile">Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="page-wrapper fade-in">
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    {% for message in messages %}
+                      <div class="flash-message"><i class="fas fa-circle-info" style="color: var(--primary);"></i> {{ message }}</div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+        function switchDashboardTab(e, tabId) {
+            e.preventDefault();
+            // Remove active from all nav items
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            
+            // This expects child templates to have a function 'activateTab(tabId)'
+            if (typeof activateTab === 'function') {
+                activateTab(tabId);
+            }
+            // Close mobile sidebar if open
+            if(window.innerWidth <= 900) toggleSidebar();
+        }
+    </script>
+    {% else %}
+    <!-- Public / Auth Screens without Sidebar -->
     <header class="top-header">
         <a href="/" class="header-brand">
-            <div class="brand-icon">
-                <i class="fas fa-leaf"></i>
-            </div>
+            <div class="brand-icon"><i class="fas fa-leaf"></i></div>
             <div class="brand-name">WasteZero</div>
         </a>
-
         <div class="header-right">
-            {% if current_user.is_authenticated and current_user.role == 'student' %}
-            <!-- Notification Bell -->
-            <div class="theme-dropdown-container" id="notif-container">
-                <button class="theme-dropdown-btn" id="notif-toggle-btn" onclick="toggleNotifMenu()" aria-label="Notifications" style="position:relative;padding:8px;border-radius:50%;border:none;background:rgba(99,102,241,0.1);">
-                    <i class="fas fa-bell" style="font-size:16px;color:var(--primary);"></i>
-                    <span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:var(--danger);color:white;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;align-items:center;justify-content:center;transform:translate(20%, -20%);">0</span>
-                </button>
-                <div class="theme-dropdown-menu" id="notif-menu" style="min-width:320px;right:-40px;">
-                    <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:13px;font-weight:700;">Notifications</span>
-                        <button onclick="readAllNotifs()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer;">Mark all read</button>
-                    </div>
-                    <div id="notif-list" style="max-height:300px;overflow-y:auto;background:var(--card-bg);border-radius:0 0 12px 12px;"></div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Theme Dropdown -->
-            <div class="theme-dropdown-container" id="theme-container">
-                <button class="theme-dropdown-btn" id="theme-toggle-btn" onclick="toggleThemeMenu()" aria-label="Theme Selector">
-                    <i class="fas fa-circle-half-stroke"></i>
-                    <span class="hide-mobile" id="theme-label">Theme</span>
-                    <i class="fas fa-chevron-down" style="font-size:9px;opacity:0.6;"></i>
-                </button>
-                <div class="theme-dropdown-menu" id="theme-menu">
-                    <button class="theme-option" data-theme="light" onclick="selectTheme('light')">
-                        <span class="theme-icon"><i class="fas fa-sun"></i></span>
-                        Light
-                        <i class="fas fa-check theme-check"></i>
-                    </button>
-                    <button class="theme-option" data-theme="dark" onclick="selectTheme('dark')">
-                        <span class="theme-icon"><i class="fas fa-moon"></i></span>
-                        Dark
-                        <i class="fas fa-check theme-check"></i>
-                    </button>
-                    <button class="theme-option" data-theme="dark-blue" onclick="selectTheme('dark-blue')">
-                        <span class="theme-icon"><i class="fas fa-water"></i></span>
-                        Dark Blue
-                        <i class="fas fa-check theme-check"></i>
-                    </button>
-                    <div style="border-top:1px solid var(--border);margin:2px 0;"></div>
-                    <button class="theme-option" data-theme="system" onclick="selectTheme('system')">
-                        <span class="theme-icon"><i class="fas fa-desktop"></i></span>
-                        System
-                        <i class="fas fa-check theme-check"></i>
-                    </button>
-                </div>
-            </div>
-
-            {% if current_user.is_authenticated %}
-                <div class="header-user">
-                    <div class="user-avatar">
-                        {{ current_user.username[0].upper() }}
-                    </div>
-                    <span class="user-name-text">{{ current_user.username }}</span>
-                </div>
-                <a href="{{ url_for('logout') }}" class="btn-logout">
-                    <i class="fas fa-arrow-right-from-bracket"></i>
-                    <span class="hide-mobile">Logout</span>
-                </a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="btn-secondary" style="text-decoration:none;">
-                    <i class="fas fa-user-shield"></i> <span class="hide-mobile">Admin</span>
-                </a>
-                <a href="{{ url_for('student_login') }}" class="btn-primary" style="text-decoration:none;">
-                    <i class="fas fa-graduation-cap"></i> <span class="hide-mobile">Portal</span>
-                </a>
-            {% endif %}
+            <a href="{{ url_for('login') }}" class="btn-secondary" style="text-decoration:none;"><i class="fas fa-user-shield"></i> <span class="hide-mobile">Admin</span></a>
+            <a href="{{ url_for('student_login') }}" class="btn-primary" style="text-decoration:none;"><i class="fas fa-graduation-cap"></i> <span class="hide-mobile">Portal</span></a>
         </div>
     </header>
-
-    <!-- ===== MAIN ===== -->
     <main class="page-wrapper fade-in">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash-message">
-                <i class="fas fa-circle-info" style="color: var(--primary);"></i>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
+        {% block public_content %}{% endblock %}
         {% block content %}{% endblock %}
     </main>
+    {% endif %}
 
     <!-- ===== FOOTER ===== -->
     <footer>
