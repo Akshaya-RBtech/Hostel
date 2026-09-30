@@ -89,6 +89,7 @@
                     <div id="fb-status-{{ menu.id }}" style="margin-top:6px;font-size:11px;display:none;font-weight:600;"></div>
                 </div>
                 {% else %}
+                <!-- VOTE BOX (Image 6) -->
                 <div id="vote-success-{{ menu.id }}" style="display:none;text-align:center;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;margin-bottom:10px;">
                     <div style="display:flex;justify-content:center;align-items:center;gap:8px;">
                         <i class="fas fa-circle-check" style="color:var(--success);font-size:18px;"></i>
@@ -96,53 +97,86 @@
                     </div>
                 </div>
                 <div id="vote-error-{{ menu.id }}" style="display:none;color:var(--danger);font-size:11px;font-weight:600;margin-bottom:6px;text-align:center;"></div>
-                <form onsubmit="submitVoteAjax(event, {{ menu.id }})" id="vote-form-{{ menu.id }}">
+                
+                <form onsubmit="submitVoteAjax(event, {{ menu.id }})" id="vote-form-{{ menu.id }}" style="background:white;border-radius:16px;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,0.1);position:relative;border:1px solid var(--border);margin-top:10px;text-align:left;">
+                    <button type="button" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--primary);cursor:pointer;"><i class="fas fa-times"></i></button>
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                        <div style="width:40px;height:40px;background:var(--primary);border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:800;color:#1e293b;font-size:15px;">{{ menu.meal_type }} - {{ menu.date }}</div>
+                            <div style="font-size:11px;color:#64748b;margin-top:2px;font-weight:500;">
+                                {{ menu.items|truncate(25) }}
+                                {% if menu.meal_type == 'Breakfast' %}(07:30 - 09:30 AM){% endif %}
+                                {% if menu.meal_type == 'Lunch' %}(12:30 - 01:30 PM){% endif %}
+                                {% if menu.meal_type == 'Dinner' %}(07:30 - 09:30 PM){% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <input type="hidden" name="menu_id" value="{{ menu.id }}">
 
-                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                    <div style="display:flex;gap:12px;margin-bottom:20px;">
                         <button type="button" onclick="selectVote({{ menu.id }}, 'Yes')"
                             id="btn-yes-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:100px;font-weight:700;font-size:13px;cursor:pointer;border:none;background:var(--success);color:white;transition:all 0.2s;font-family:'Inter',sans-serif;">
-                            <i class="fas fa-check-circle" style="margin-right:6px;"></i>Coming
+                            style="flex:1;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;border:none;background:var(--success);color:white;transition:all 0.2s;">
+                            <i class="far fa-check-circle" style="margin-right:6px;"></i>Coming
                         </button>
                         <button type="button" onclick="selectVote({{ menu.id }}, 'No')"
                             id="btn-no-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:100px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.05);color:var(--danger);transition:all 0.2s;font-family:'Inter',sans-serif;">
-                            <i class="fas fa-times-circle" style="margin-right:6px;"></i>Not Coming
+                            style="flex:1;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;border:1px solid #fecaca;background:linear-gradient(to right, #fef2f2, #ffe4e6);color:#ef4444;transition:all 0.2s;">
+                            <i class="far fa-times-circle" style="margin-right:6px;"></i>Not Coming
                         </button>
                     </div>
 
                     <input type="hidden" name="choice" id="choice-{{ menu.id }}">
 
-                    <div id="reason-box-{{ menu.id }}" style="display:none;margin-bottom:10px;">
-                        <div style="font-size:11px;font-weight:600;margin-bottom:6px;color:var(--text-secondary);">If Not Coming, please select reason:</div>
-                        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
-                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
-                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Don't like the menu" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                    <div id="reason-box-{{ menu.id }}" style="display:none;margin-bottom:20px;">
+                        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:#475569;">If Not Coming, please select reason:</div>
+                        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+                            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#334155;cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Don't like the menu" onchange="toggleOtherReason({{ menu.id }}, this.value)" style="width:18px;height:18px;accent-color:var(--primary);">
                                 Don't like the menu
                             </label>
-                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
-                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Going outside" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#334155;cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Going outside" onchange="toggleOtherReason({{ menu.id }}, this.value)" style="width:18px;height:18px;accent-color:var(--primary);">
                                 Going outside
                             </label>
-                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
-                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Sick" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#334155;cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Sick" onchange="toggleOtherReason({{ menu.id }}, this.value)" style="width:18px;height:18px;accent-color:var(--primary);">
                                 Sick
                             </label>
-                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
-                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Other" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#334155;cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Other" onchange="toggleOtherReason({{ menu.id }}, this.value)" style="width:18px;height:18px;accent-color:var(--primary);">
                                 Other
                             </label>
                         </div>
                         <input type="hidden" name="reason" id="reason-{{ menu.id }}">
-                        <textarea id="reason-other-{{ menu.id }}" rows="2" class="form-input"
-                            placeholder="Enter custom reason..." style="display:none;width:100%;font-size:13px;" oninput="updateReasonField({{ menu.id }})"></textarea>
+                        <textarea id="reason-other-{{ menu.id }}" rows="1" class="form-input"
+                            placeholder="Enter reason (if other)" style="display:none;width:100%;font-size:13px;padding:12px 14px;border-radius:8px;" oninput="updateReasonField({{ menu.id }})"></textarea>
                     </div>
 
-                    <button type="submit" id="submit-btn-{{ menu.id }}" style="display:none;width:100%;" class="btn-primary" style="justify-content:center;padding:11px;margin-top:4px;">
-                        I Will Skip
-                    </button>
+                    <div style="display:flex;gap:12px;" id="submit-btn-group-{{ menu.id }}">
+                        <button type="submit" id="submit-btn-{{ menu.id }}" style="display:none;flex:1;background:var(--primary);color:white;padding:12px;border:none;border-radius:10px;font-weight:700;cursor:pointer;">
+                            Submit
+                        </button>
+                        <button type="button" onclick="document.getElementById('vote-form-{{ menu.id }}').reset(); document.getElementById('submit-btn-{{ menu.id }}').style.display='none'; document.getElementById('cancel-btn-{{ menu.id }}').style.display='none';" id="cancel-btn-{{ menu.id }}" style="display:none;flex:1;background:white;color:#64748b;border:1px solid #cbd5e1;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;">
+                            Cancel
+                        </button>
+                    </div>
                 </form>
+                <script>
+                    // Update selectVote to show submit button nicely as per design
+                    const oldSelectVote{{ menu.id }} = window.selectVote;
+                    window.selectVote = function(id, val) {
+                        if(typeof oldSelectVote{{ menu.id }} === 'function') oldSelectVote{{ menu.id }}(id, val);
+                        if(id == {{ menu.id }}) {
+                            document.getElementById('submit-btn-' + id).style.display = 'block';
+                            document.getElementById('cancel-btn-' + id).style.display = 'block';
+                        }
+                    }
+                </script>
                 {% endif %}
             </div>
         </div>
@@ -310,55 +344,75 @@
     </div>
     </div> <!-- END COMPLAINTS TAB -->
 
-    <!-- ===== LEAVES TAB ===== -->
+    <!-- ===== LEAVES TAB (Image 8 logic) ===== -->
     <div id="content-leaves" class="tab-content" style="display:none;">
-        <!-- Leave Request -->
-        <div class="card" style="padding:20px;">
-            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">
-                <i class="fas fa-calendar-minus" style="color:var(--warning);margin-right:8px;"></i>Request Hostel Leave
-            </h3>
-            <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Approved leave automatically cancels upcoming meal confirmations.</p>
-            <form onsubmit="submitStudentLeave(event)">
-                <div style="display:flex;gap:10px;margin-bottom:10px;">
-                    <div style="flex:1;">
-                        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);">Start Date</label>
-                        <input type="date" id="leave-start" class="form-input" style="width:100%;font-size:13px;" required>
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);">End Date</label>
-                        <input type="date" id="leave-end" class="form-input" style="width:100%;font-size:13px;" required>
+        <div class="card" style="padding:24px;background:white;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);max-width:440px;margin:0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&background=10b981&color=fff&size=40" style="width:40px;height:40px;border-radius:50%;" alt="Avatar">
+                    <h3 style="font-size:16px;font-weight:700;color:#1e293b;margin:0;">New Leave Request</h3>
+                </div>
+                <button style="background:none;border:none;color:#64748b;font-size:16px;cursor:pointer;"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form onsubmit="submitStudentLeave(event)" style="display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Leave Start Date</label>
+                    <div style="position:relative;">
+                        <input type="date" id="leave-start" class="form-input" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;" required>
                     </div>
                 </div>
-                <textarea id="leave-reason" class="form-input" rows="1" placeholder="Reason (Optional)" style="margin-bottom:10px;width:100%;font-size:13px;"></textarea>
-                <button type="submit" class="btn-primary" style="width:100%;padding:10px;display:flex;justify-content:center;background:var(--warning);border-color:var(--warning);">
-                    <i class="fas fa-arrow-right-from-bracket" style="margin-right:6px;"></i> Submit Request
+                
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Leave End Date</label>
+                    <div style="position:relative;">
+                        <input type="date" id="leave-end" class="form-input" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Leave Type</label>
+                    <select id="leave-type" class="form-input" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;" required>
+                        <option value="Personal Leave">Personal Leave</option>
+                        <option value="Medical Leave">Medical Leave</option>
+                        <option value="Academic Duty">Academic Duty</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Reason</label>
+                    <textarea id="leave-reason" class="form-input" rows="3" placeholder="Family function at home" style="width:100%;font-size:14px;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;color:#1e293b;" required></textarea>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Optional Document</label>
+                    <div style="display:flex;align-items:center;border:1px solid #cbd5e1;border-radius:8px;padding:6px;background:white;gap:10px;">
+                        <label for="optional-doc" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                            <i class="fas fa-file-upload"></i> Choose File
+                        </label>
+                        <input type="file" id="optional-doc" style="display:none;">
+                        <span style="font-size:12px;color:#94a3b8;">No file chosen</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary" style="width:100%;padding:14px;display:flex;justify-content:center;background:var(--primary);border:none;border-radius:8px;font-size:15px;font-weight:700;margin-top:8px;">
+                    Submit Request
                 </button>
             </form>
-            <div id="leave-status" style="margin-top:10px;font-size:12px;display:none;font-weight:600;text-align:center;"></div>
+            <div id="leave-status" style="margin-top:12px;font-size:13px;display:none;font-weight:600;text-align:center;"></div>
         </div>
     </div> <!-- END LEAVES TAB -->
 
 
-    <!-- ===== AGENT TAB ===== -->
+    <!-- ===== AGENT TAB (Image 7 logic) ===== -->
     <div id="content-agent" class="tab-content" style="display:none;">
-    <!-- AI Assistant Section -->
-    <div class="card" style="max-width:600px;margin:0 auto;">
-        <div style="padding:20px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                <div style="width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:12px;display:flex;align-items:center;justify-content:center;">
+    <!-- AI Assistant Section aligned to Image 7 -->
+    <div class="card" style="max-width:500px;margin:0 auto;background:white;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);overflow:hidden;display:flex;flex-direction:column;height:75vh;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #f1f5f9;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                     <i class="fas fa-robot" style="color:white;font-size:18px;"></i>
                 </div>
-                <div>
-                    <div style="font-weight:700;font-size:14px;color:var(--text-primary);">WasteZero Assistant</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Ask about menus, diet tips, or voting</div>
-                </div>
-            </div>
-
-            <!-- Quick prompts -->
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
-                <button onclick="setStudentPrompt('What is for lunch today?')" style="padding:6px 12px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:var(--primary);cursor:pointer;font-family:'Inter',sans-serif;">🍽️ Today's Menu</button>
-                <button onclick="setStudentPrompt('Should I eat today?')" style="padding:6px 12px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--success);cursor:pointer;font-family:'Inter',sans-serif;">🤔 Should I Eat?</button>
-                <button onclick="setStudentPrompt('Give me healthy diet tips')" style="padding:6px 12px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:var(--warning);cursor:pointer;font-family:'Inter',sans-serif;">💡 Diet Tips</button>
             </div>
 
             <!-- Messages -->

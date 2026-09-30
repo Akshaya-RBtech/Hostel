@@ -200,24 +200,14 @@
             width: 100%;
         }
 
-        /* ── SIDEBAR ── */
-        .sidebar {
-            width: 260px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--sidebar-border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; bottom: 0; left: 0;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
+        /* ── REMOVED SIDEBAR ── */
+        /* Force single column layout globally */
         .main-wrapper {
             flex: 1;
-            margin-left: 260px; /* space for sidebar */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            width: 100%;
         }
 
         /* ── TOP HEADER ── */
@@ -768,40 +758,30 @@
         /* ===========================
            RESPONSIVE
            =========================== */
-        /* ===========================
-           RESPONSIVE
-           =========================== */
-        @media (max-width: 900px) {
-            .sidebar { transform: translateX(-100%); display: none; }
-            .sidebar.open { transform: translateX(0); display: block; }
-            .main-wrapper { margin-left: 0; width: 100%; padding-bottom: 70px; } /* Space for bottom nav */
-            .mobile-menu-btn { display: block; }
-            .page-wrapper { padding: 16px; }
-            .top-header { padding: 0 16px; }
-            
-            /* Responsive tables */
-            .data-table-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
+        /* Responsive Fix for Top Header without Sidebar */
+        .top-header { padding: 0 16px; }
+        .header-brand { display: flex !important; }
+
+        /* The Dashboard Content Area */
+        .page-wrapper {
+            padding: 16px 16px 80px 16px;
+            max-width: 800px;
+            margin: 0 auto;
         }
+        .main-wrapper { margin-left: 0; width: 100%; padding-bottom: 70px; }
+        .mobile-menu-btn { display: block; }
         
-        /* Overlay for mobile sidebar (Admin only on mobile) */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            backdrop-filter: blur(4px);
+        /* Responsive tables */
+        .data-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
-        .sidebar-overlay.open { display: block; }
 
         /* ===========================
-           BOTTOM NAVIGATION (MOBILE)
+           BOTTOM NAVIGATION
            =========================== */
         .bottom-nav {
-            display: none;
+            display: flex;
             position: fixed;
             bottom: 0;
             left: 0;
@@ -841,81 +821,21 @@
             padding: 6px 14px;
             border-radius: 12px;
         }
-        @media (max-width: 900px) {
-            .bottom-nav.visible-mobile {
-                display: flex;
-            }
-        }
     </style>
 
 </head>
 <body>
     {% if current_user.is_authenticated %}
-    <div class="app-container">
-        <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <a href="/" class="sidebar-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <div class="brand-name">WasteZero</div>
-            </a>
-            <div class="sidebar-nav" id="sidebar-nav-container">
-                <!-- Navigation is injected via JS depending on role to avoid template engine duplication across child files -->
-                {% if current_user.role == 'admin' %}
-                    <a href="#" class="nav-item active" onclick="switchDashboardTab(event, 'overview')">
-                        <i class="fas fa-chart-pie"></i> Dashboard
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'menu')">
-                        <i class="fas fa-calendar-alt"></i> Menu Mgmt
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'ai')">
-                        <i class="fas fa-brain"></i> AI Prediction
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'ops')">
-                        <i class="fas fa-users-cog"></i> Ops & Leaves
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'inventory')">
-                        <i class="fas fa-boxes"></i> Inventory
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'comms')">
-                        <i class="fas fa-bullhorn"></i> Comms
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'agent')">
-                        <i class="fas fa-robot"></i> AI Assistant
-                    </a>
-                {% else %}
-                    <a href="#" class="nav-item active" onclick="switchDashboardTab(event, 'home')">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'calendar')">
-                        <i class="fas fa-calendar-week"></i> Meal Calendar
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'complaints')">
-                        <i class="fas fa-flag"></i> Complaints
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'leaves')">
-                        <i class="fas fa-plane-departure"></i> Leave Form
-                    </a>
-                    <a href="#" class="nav-item" onclick="switchDashboardTab(event, 'agent')">
-                        <i class="fas fa-robot"></i> AI Assistant
-                    </a>
-                {% endif %}
-            </div>
-        </aside>
-
         <div class="main-wrapper">
     {% endif %}
 
             <!-- ===== TOP HEADER ===== -->
             <header class="top-header">
                 {% if current_user.is_authenticated %}
-                <button class="mobile-menu-btn" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <a href="/" class="header-brand">
+                    <div class="brand-icon"><i class="fas fa-leaf"></i></div>
+                    <div class="brand-name hide-mobile">WasteZero</div>
+                </a>
                 {% else %}
                 <a href="/" class="header-brand">
                     <div class="brand-icon"><i class="fas fa-leaf"></i></div>

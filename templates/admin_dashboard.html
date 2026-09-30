@@ -282,16 +282,54 @@
                 </div>
             </div>
 
-            <!-- Leave Requests Module -->
-            <div class="card">
-                <div class="card-header">
+            <!-- Leave Requests Module aligned to Image 9 -->
+            <div class="card lg:col-span-2">
+                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding:20px 24px;">
                     <div>
-                        <div class="section-title">Leave Requests</div>
-                        <div class="section-sub">Approve or reject student availability limits</div>
+                        <div style="font-size:16px;font-weight:700;color:#1e293b;">Leave Requests</div>
+                    </div>
+                    <div style="display:flex;gap:16px;">
+                        <select class="form-input" style="padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid #cbd5e1;color:#475569;min-width:140px;">
+                            <option>All Status</option>
+                            <option>Pending</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                        </select>
+                        <div style="position:relative;">
+                            <i class="fas fa-search" style="position:absolute;left:12px;top:10px;color:#cbd5e1;font-size:12px;"></i>
+                            <input type="text" placeholder="Search students..." class="form-input" style="padding:8px 12px 8px 32px;border-radius:8px;font-size:13px;border:1px solid #cbd5e1;color:#475569;min-width:200px;">
+                        </div>
+                        <div style="display:flex;gap:12px;color:#64748b;align-items:center;margin-left:12px;">
+                            <button style="background:none;border:none;cursor:pointer;color:#64748b;"><i class="fas fa-fingerprint"></i></button>
+                            <button style="background:none;border:none;cursor:pointer;color:#64748b;"><i class="far fa-user"></i></button>
+                            <button style="background:none;border:none;cursor:pointer;color:#64748b;"><i class="fas fa-times"></i></button>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body" style="max-height:450px;overflow-y:auto;" id="ops-leave">
-                    <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px;">Loading leave requests...</div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px solid #f1f5f9;color:#475569;font-size:12px;">
+                                <th style="padding:16px 24px;font-weight:700;">Student</th>
+                                <th style="padding:16px 24px;font-weight:700;">Leave Dates</th>
+                                <th style="padding:16px 24px;font-weight:700;">Type</th>
+                                <th style="padding:16px 24px;font-weight:700;">Reason</th>
+                                <th style="padding:16px 24px;font-weight:700;text-align:center;">Status</th>
+                                <th style="padding:16px 24px;font-weight:700;text-align:center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ops-leave" style="font-size:13px;color:#334155;">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Loading leave requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination mock -->
+                <div style="padding:16px;display:flex;justify-content:center;gap:6px;border-top:1px solid #f1f5f9;">
+                    <button style="width:28px;height:28px;border-radius:4px;border:1px solid var(--primary);background:var(--primary);color:white;font-weight:700;font-size:12px;">1</button>
+                    <button style="width:28px;height:28px;border-radius:4px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:12px;">2</button>
+                    <button style="width:28px;height:28px;border-radius:4px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:12px;">3</button>
+                    <button style="width:28px;height:28px;border-radius:4px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:12px;">4</button>
+                    <button style="width:32px;height:28px;border-radius:4px;border:1px solid #e2e8f0;background:white;color:#64748b;font-weight:700;font-size:12px;">30+</button>
                 </div>
             </div>
 
@@ -1216,24 +1254,31 @@
             const leaveData = await leaveRes.json();
             const leaveDiv = document.getElementById('ops-leave');
             if (leaveData.length === 0) {
-                leaveDiv.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px;">No leave requests found.</div>`;
+                leaveDiv.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:#94a3b8;">No leave requests found.</td></tr>`;
             } else {
-                leaveDiv.innerHTML = leaveData.map(L => `
-                    <div style="padding:14px;border-bottom:1px solid var(--border);border-left:4px solid ${L.status === 'Pending' ? 'var(--warning)' : L.status === 'Rejected' ? 'var(--danger)' : 'var(--success)'};margin-bottom:8px;background:var(--input-bg);border-radius:0 8px 8px 0;">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-                            <span style="font-weight:700;font-size:13px;color:var(--text-primary);"><i class="fas fa-user-circle"></i> ${L.student_id}</span>
-                            <span style="font-size:11px;color:var(--text-muted);">${L.created_at}</span>
-                        </div>
-                        <div style="font-weight:600;font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Leave: ${L.start_date} to ${L.end_date}</div>
-                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Reason: ${L.reason || 'None'}</p>
-                        <div style="display:flex;gap:6px;">
+                leaveDiv.innerHTML = leaveData.map(L => {
+                    let statusLabel = '';
+                    if(L.status === 'Pending') statusLabel = `<span style="padding:6px 12px;border-radius:100px;background:#fef3c7;color:#d97706;font-weight:700;font-size:11px;">Pending</span>`;
+                    else if(L.status === 'Approved') statusLabel = `<span style="padding:6px 12px;border-radius:100px;background:#d1fae5;color:#059669;font-weight:700;font-size:11px;">Approved</span>`;
+                    else statusLabel = `<span style="padding:6px 12px;border-radius:100px;background:#fee2e2;color:#dc2626;font-weight:700;font-size:11px;">Rejected</span>`;
+
+                    return `
+                    <tr style="border-bottom:1px solid #f8fafc;background:white;transition:all 0.2s;">
+                        <td style="padding:16px 24px;font-weight:700;color:#1e293b;">${L.student_id}</td>
+                        <td style="padding:16px 24px;color:#475569;">${L.start_date.slice(5)} to ${L.end_date.slice(5)}</td>
+                        <td style="padding:16px 24px;color:#3b82f6;font-weight:500;">${L.leave_type || 'Personal'}</td>
+                        <td style="padding:16px 24px;color:#475569;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${L.reason || 'N/A'}</td>
+                        <td style="padding:16px 24px;text-align:center;">${statusLabel}</td>
+                        <td style="padding:16px 24px;text-align:center;">
                             ${L.status === 'Pending' ? `
-                            <button onclick="updateLeave(${L.id}, 'Approved')" style="flex:1;padding:6px;background:var(--success);color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Approve</button>
-                            <button onclick="updateLeave(${L.id}, 'Rejected')" style="flex:1;padding:6px;background:var(--danger);color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Reject</button>
-                            ` : `<span style="font-size:12px;font-weight:600;padding:4px 8px;background:var(--border);border-radius:4px;color:var(--text-primary);">Status: ${L.status}</span>`}
-                        </div>
-                    </div>
-                `).join('');
+                                <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+                                    <button onclick="updateLeave(${L.id}, 'Approved')" style="padding:4px 12px;background:var(--success);color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:70px;">Approve</button>
+                                    <button onclick="updateLeave(${L.id}, 'Rejected')" style="padding:4px 12px;background:var(--danger);color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:70px;">Reject</button>
+                                </div>
+                            ` : `<span style="color:#cbd5e1;font-size:11px;">-</span>`}
+                        </td>
+                    </tr>
+                `}).join('');
             }
         } catch (e) {
             console.error('Failure fetching leave requests');
