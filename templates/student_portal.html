@@ -89,6 +89,57 @@
     </div>
     {% endif %}
 
+    <!-- Operations Section: Complaints & Leave -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <!-- New Complaint -->
+        <div class="card" style="padding:20px;">
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">
+                <i class="fas fa-flag" style="color:var(--danger);margin-right:8px;"></i>File a Mess Complaint
+            </h3>
+            <form onsubmit="submitStudentComplaint(event)">
+                <select id="comp-category" class="form-input" style="margin-bottom:10px;width:100%;font-size:13px;" required>
+                    <option value="">Select Category...</option>
+                    <option value="Food Quality">Food Quality & Taste</option>
+                    <option value="Cleanliness">Hygiene & Cleanliness</option>
+                    <option value="Meal Timing">Meal Timings</option>
+                    <option value="Portion Size">Portion Size</option>
+                    <option value="Other">Other Issues</option>
+                </select>
+                <textarea id="comp-description" class="form-input" rows="3" placeholder="Describe your issue..." style="margin-bottom:10px;width:100%;font-size:13px;" required></textarea>
+                <button type="submit" class="btn-primary" style="width:100%;padding:10px;display:flex;justify-content:center;">
+                    <i class="fas fa-paper-plane" style="margin-right:6px;"></i> Submit Complaint
+                </button>
+            </form>
+            <div id="comp-status" style="margin-top:10px;font-size:12px;display:none;font-weight:600;text-align:center;"></div>
+        </div>
+
+        <!-- Leave Request -->
+        <div class="card" style="padding:20px;">
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">
+                <i class="fas fa-calendar-minus" style="color:var(--warning);margin-right:8px;"></i>Request Hostel Leave
+            </h3>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Approved leave automatically cancels upcoming meal confirmations.</p>
+            <form onsubmit="submitStudentLeave(event)">
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);">Start Date</label>
+                        <input type="date" id="leave-start" class="form-input" style="width:100%;font-size:13px;" required>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:11px;font-weight:600;color:var(--text-secondary);">End Date</label>
+                        <input type="date" id="leave-end" class="form-input" style="width:100%;font-size:13px;" required>
+                    </div>
+                </div>
+                <textarea id="leave-reason" class="form-input" rows="1" placeholder="Reason (Optional)" style="margin-bottom:10px;width:100%;font-size:13px;"></textarea>
+                <button type="submit" class="btn-primary" style="width:100%;padding:10px;display:flex;justify-content:center;background:var(--warning);border-color:var(--warning);">
+                    <i class="fas fa-arrow-right-from-bracket" style="margin-right:6px;"></i> Submit Request
+                </button>
+            </form>
+            <div id="leave-status" style="margin-top:10px;font-size:12px;display:none;font-weight:600;text-align:center;"></div>
+        </div>
+    </div>
+
+
     <!-- AI Assistant Section -->
     <div class="card" style="max-width:600px;margin:0 auto;">
         <div style="padding:20px;">
@@ -206,9 +257,69 @@
             container.innerHTML += `
                 <div style="display:flex;align-items:flex-start;gap:8px;">
                     <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-size:10px;flex-shrink:0;"><i class="fas fa-robot"></i></div>
+            container.innerHTML += `
+                <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-size:10px;flex-shrink:0;"><i class="fas fa-robot"></i></div>
                     <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:0 12px 12px 12px;padding:10px 14px;font-size:12px;color:var(--danger);">Sorry, I couldn't connect. Try again in a moment.</div>
                 </div>`;
         }
+    }
+
+    async function submitStudentComplaint(e) {
+        e.preventDefault();
+        const cat = document.getElementById('comp-category').value;
+        const desc = document.getElementById('comp-description').value;
+        const btn = e.target.querySelector('button');
+        const st = document.getElementById('comp-status');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: cat, description: desc })
+            });
+            const data = await res.json();
+            st.style.display = 'block';
+            st.style.color = 'var(--success)';
+            st.innerText = '✅ Complaint submitted and sent to Warden.';
+            e.target.reset();
+        } catch(err) {
+            st.style.display = 'block';
+            st.style.color = 'var(--danger)';
+            st.innerText = '❌ Failed to submit complaint.';
+        }
+        btn.disabled = false;
+        setTimeout(() => st.style.display='none', 4000);
+    }
+
+    async function submitStudentLeave(e) {
+        e.preventDefault();
+        const start = document.getElementById('leave-start').value;
+        const end = document.getElementById('leave-end').value;
+        const reason = document.getElementById('leave-reason').value;
+        const btn = e.target.querySelector('button');
+        const st = document.getElementById('leave-status');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ start_date: start, end_date: end, reason: reason })
+            });
+            const data = await res.json();
+            st.style.display = 'block';
+            st.style.color = 'var(--success)';
+            st.innerText = '✅ Leave requested. Waiting for Warden approval.';
+            e.target.reset();
+        } catch(err) {
+            st.style.display = 'block';
+            st.style.color = 'var(--danger)';
+            st.innerText = '❌ Failed to submit leave.';
+        }
+        btn.disabled = false;
+        setTimeout(() => st.style.display='none', 4000);
     }
 </script>
 {% endblock %}

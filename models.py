@@ -100,6 +100,25 @@ class Notification(db.Model):
     
     user = db.relationship('User', backref=db.backref('notifications', lazy=True))
 
+# ── Complaints and Leave (New Operations) ──
+class Complaint(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(50), nullable=False) # Food Quality, Cleanliness, Timing, etc
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='Open') # Open, In Progress, Resolved, Rejected
+    admin_note = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+class LeaveRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(50), nullable=False)
+    start_date = db.Column(db.String(20), nullable=False)
+    end_date = db.Column(db.String(20), nullable=False)
+    reason = db.Column(db.String(200), nullable=True)
+    status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
 
 class FoodPredictor:
     def __init__(self, data_path='hostel_food_data.csv', model_path='xgboost_model.joblib'):

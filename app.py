@@ -11,7 +11,7 @@ ADMIN_SETUP_SECRET = os.environ.get("ADMIN_SETUP_SECRET", "")
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage, Announcement, Notification
+from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage, Announcement, Notification, Complaint, LeaveRequest
 from ai_engine import WasteAnalyticsAI
 from datetime import datetime, timedelta
 
@@ -636,10 +636,158 @@ def get_notifications():
 @login_required
 def read_all_notifications():
     if current_user.role != 'student':
-        return jsonify({'error': 'Unauthorized'}), 403
+        return jsonify({"error": "Unauthorized"}), 403
     Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
     db.session.commit()
-    return jsonify({'success': True})
+    return jsonify({"success": True})
+
+
+# ── COMPLAINTS & LEAVE PIPELINE ──
+
+@app.route('/api/complaints', methods=['GET', 'POST'])
+@login_required
+def handle_complaints():
+    if request.method == 'POST':
+        if current_user.role != 'student':
+            return jsonify({"error": "Unauthorized"}), 403
+        data = request.json
+        c = Complaint(
+            student_id=current_user.student_id,
+            category=data.get('category'),
+            description=data.get('description'),
+            status='Open'
+        )
+        db.session.add(c)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Complaint submitted successfully."})
+    
+    # GET: Admin sees all, student sees own
+    if current_user.role == 'admin':
+        reqs = Complaint.query.order_by(Complaint.created_at.desc()).all()
+    else:
+        reqs = Complaint.query.filter_by(student_id=current_user.student_id).order_by(Complaint.created_at.desc()).all()
+    
+    return jsonify([{
+        "id": r.id,
+        "student_id": r.student_id,
+        "category": r.category,
+        "description": r.description,
+        "status": r.status,
+        "admin_note": r.admin_note,
+        "created_at": r.created_at.strftime('%Y-%m-%d %H:%M')
+    } for r in reqs])
+
+@app.route('/api/complaints/<int:complaint_id>/update', methods=['POST'])
+@login_required
+def update_complaint(complaint_id):
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    complaint = Complaint.query.get(complaint_id)
+    if not complaint:
+        return jsonify({"error": "Not Found"}), 404
+        
+    data = request.json
+    complaint.status = data.get('status', complaint.status)
+    complaint.admin_note = data.get('admin_note', complaint.admin_note)
+    db.session.commit()
+    
+    # Optionally notify the student
+    u = User.query.filter_by(student_id=complaint.student_id, role='student').first()
+    if u:
+        n = Notification(
+            user_id=u.id,
+            title="Complaint Update",
+            message=f"Your complaint regarding '{complaint.category}' is now {complaint.status}."
+        )
+        db.session.add(n)
+        db.session.commit()
+
+    return jsonify({"success": True})
+
+
+@app.route('/api/leave', methods=['GET', 'POST'])
+@login_required
+def handle_leave():
+    if request.method == 'POST':
+        if current_user.role != 'student':
+            return jsonify({"error": "Unauthorized"}), 403
+        data = request.json
+        c = LeaveRequest(
+            student_id=current_user.student_id,
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+            reason=data.get('reason'),
+            status='Pending'
+        )
+        db.session.add(c)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Leave request submitted."})
+    
+    # GET: Admin sees all, student sees own
+    if current_user.role == 'admin':
+        reqs = LeaveRequest.query.order_by(LeaveRequest.created_at.desc()).all()
+    else:
+        reqs = LeaveRequest.query.filter_by(student_id=current_user.student_id).order_by(LeaveRequest.created_at.desc()).all()
+    
+    return jsonify([{
+        "id": r.id,
+        "student_id": r.student_id,
+        "start_date": r.start_date,
+        "end_date": r.end_date,
+        "reason": r.reason,
+        "status": r.status,
+        "created_at": r.created_at.strftime('%Y-%m-%d %H:%M')
+    } for r in reqs])
+
+@app.route('/api/leave/<int:leave_id>/update', methods=['POST'])
+@login_required
+def update_leave(leave_id):
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    leave = LeaveRequest.query.get(leave_id)
+    if not leave:
+        return jsonify({"error": "Not Found"}), 404
+        
+    data = request.json
+    leave.status = data.get('status', leave.status)
+    db.session.commit()
+    
+    # Automatically cancel meals in that range if Approved
+    if leave.status == 'Approved':
+        start_date = datetime.strptime(leave.start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(leave.end_date, '%Y-%m-%d').date()
+        
+        delta = timedelta(days=1)
+        curr_date = start_date
+        while curr_date <= end_date:
+            date_str = curr_date.strftime('%Y-%m-%d')
+            # Look up menus in range
+            menus = MenuEntry.query.filter_by(date=date_str, published=True).all()
+            for m in menus:
+                # Mark as 'no' for attendance
+                v = Vote.query.filter_by(student_id=leave.student_id, date=date_str, meal_type=m.meal_type).first()
+                if not v:
+                    v = Vote(student_id=leave.student_id, date=date_str, meal_type=m.meal_type)
+                    db.session.add(v)
+                v.vote = 'no'
+                v.skip_reason = 'Approved Hostel Leave'
+            curr_date += delta
+        db.session.commit()
+        
+    # Notify student
+    u = User.query.filter_by(student_id=leave.student_id, role='student').first()
+    if u:
+        n = Notification(
+            user_id=u.id,
+            title="Leave Request Update",
+            message=f"Your leave request from {leave.start_date} to {leave.end_date} has been {leave.status}."
+        )
+        db.session.add(n)
+        db.session.commit()
+
+    return jsonify({"success": True})
 
 
 # --- Student Portal ---
