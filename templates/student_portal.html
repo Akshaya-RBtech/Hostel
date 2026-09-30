@@ -40,11 +40,25 @@
 
                 {% if menu.id in voted_ids %}
                 <div style="text-align:center;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;">
-                    <div style="display:flex;justify-content:center;align-items:center;gap:8px;">
+                    <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:6px;">
                         <i class="fas fa-circle-check" style="color:var(--success);font-size:18px;"></i>
                         <span style="color:var(--success);font-weight:700;font-size:13px;">Vote Submitted!</span>
                     </div>
-                    <p style="color:var(--text-muted);font-size:11px;margin-top:4px;">You've already voted for this meal.</p>
+                    <div style="font-size:11px;font-weight:600;padding:4px 8px;background:rgba(0,0,0,0.05);border-radius:6px;display:inline-block;margin-bottom:8px;">Status: {{ menu.kitchen_status }}</div>
+                    
+                    <hr style="border-color:var(--border);margin:8px 0;opacity:0.5;">
+                    <form onsubmit="submitStudentFeedback(event, {{ menu.id }})">
+                        <div style="font-size:11px;font-weight:600;margin-bottom:6px;">How was the meal?</div>
+                        <select id="fb-rating-{{ menu.id }}" class="form-input" style="font-size:11px;padding:4px;margin-bottom:6px;width:100%;" required>
+                            <option value="">Select Rating...</option>
+                            <option value="Like">👍 Liked it</option>
+                            <option value="Neutral">😐 Neutral</option>
+                            <option value="Dislike">👎 Disliked it</option>
+                        </select>
+                        <input type="text" id="fb-comment-{{ menu.id }}" class="form-input" style="font-size:11px;padding:4px;width:100%;margin-bottom:6px;" placeholder="Optional comment (e.g., too spicy)">
+                        <button type="submit" class="btn-primary" style="font-size:11px;padding:6px;width:100%;display:flex;justify-content:center;">Submit Feedback</button>
+                    </form>
+                    <div id="fb-status-{{ menu.id }}" style="margin-top:6px;font-size:11px;display:none;font-weight:600;"></div>
                 </div>
                 {% else %}
                 <form action="{{ url_for('vote') }}" method="POST" id="vote-form-{{ menu.id }}">
@@ -66,8 +80,16 @@
                     <input type="hidden" name="choice" id="choice-{{ menu.id }}">
 
                     <div id="reason-box-{{ menu.id }}" style="display:none;margin-bottom:10px;">
-                        <textarea name="reason" id="reason-{{ menu.id }}" rows="2" class="form-input"
-                            placeholder="Why are you skipping? (helps reduce waste)"></textarea>
+                        <select class="form-input" id="reason-select-{{ menu.id }}" style="width:100%;font-size:13px;margin-bottom:6px;" onchange="toggleOtherReason({{ menu.id }})">
+                            <option value="">Select Reason...</option>
+                            <option value="Don't like the menu">Don't like the menu</option>
+                            <option value="Going outside">Going outside</option>
+                            <option value="Sick">Sick</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="hidden" name="reason" id="reason-{{ menu.id }}">
+                        <textarea id="reason-other-{{ menu.id }}" rows="2" class="form-input"
+                            placeholder="Specify other reason..." style="display:none;width:100%;font-size:13px;" oninput="updateReasonField({{ menu.id }})"></textarea>
                     </div>
 
                     <button type="submit" id="submit-btn-{{ menu.id }}" style="display:none;width:100%;" class="btn-primary" style="justify-content:center;padding:11px;margin-top:4px;">
@@ -209,6 +231,29 @@
             yesBtn.style.color = 'var(--success)';
             yesBtn.style.borderColor = 'rgba(16,185,129,0.3)';
             reasonBox.style.display = 'block';
+            document.getElementById('reason-select-' + menuId).required = true;
+        }
+    }
+
+    function toggleOtherReason(menuId) {
+        const sel = document.getElementById('reason-select-' + menuId);
+        const otherInput = document.getElementById('reason-other-' + menuId);
+        const hiddenInput = document.getElementById('reason-' + menuId);
+        
+        if (sel.value === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+            hiddenInput.value = otherInput.value;
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+            hiddenInput.value = sel.value;
+        }
+    }
+
+    function updateReasonField(menuId) {
+        if (document.getElementById('reason-select-' + menuId).value === 'Other') {
+            document.getElementById('reason-' + menuId).value = document.getElementById('reason-other-' + menuId).value;
         }
     }
 
@@ -317,6 +362,33 @@
             st.style.display = 'block';
             st.style.color = 'var(--danger)';
             st.innerText = '❌ Failed to submit leave.';
+        }
+        btn.disabled = false;
+        setTimeout(() => st.style.display='none', 4000);
+    }
+
+    async function submitStudentFeedback(e, menuId) {
+        e.preventDefault();
+        const rating = document.getElementById('fb-rating-' + menuId).value;
+        const comment = document.getElementById('fb-comment-' + menuId).value;
+        const btn = e.target.querySelector('button');
+        const st = document.getElementById('fb-status-' + menuId);
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ menu_id: menuId, rating: rating, comments: comment })
+            });
+            st.style.display = 'block';
+            st.style.color = 'var(--success)';
+            st.innerText = '✅ Feedback saved!';
+            e.target.reset();
+        } catch(err) {
+            st.style.display = 'block';
+            st.style.color = 'var(--danger)';
+            st.innerText = '❌ Failed.';
         }
         btn.disabled = false;
         setTimeout(() => st.style.display='none', 4000);

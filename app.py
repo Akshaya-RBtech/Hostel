@@ -11,7 +11,7 @@ ADMIN_SETUP_SECRET = os.environ.get("ADMIN_SETUP_SECRET", "")
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage, Announcement, Notification, Complaint, LeaveRequest
+from models import db, User, MenuEntry, Vote, FoodPredictor, FoodConsumption, AIReport, ChatMessage, Announcement, Notification, Complaint, LeaveRequest, Ingredient, Feedback
 from ai_engine import WasteAnalyticsAI
 from datetime import datetime, timedelta
 
@@ -114,6 +114,12 @@ def safe_migrate_db():
         if 'full_name' not in columns:
             cursor.execute("ALTER TABLE user ADD COLUMN full_name VARCHAR(120)")
             print("[Migration] Added 'full_name' column to User table.")
+            
+        cursor.execute("PRAGMA table_info(menu_entry)")
+        menucolumns = [col[1] for col in cursor.fetchall()]
+        if 'kitchen_status' not in menucolumns:
+            cursor.execute("ALTER TABLE menu_entry ADD COLUMN kitchen_status VARCHAR(50) DEFAULT 'Planned'")
+            print("[Migration] Added 'kitchen_status' column to MenuEntry table.")
         
         conn.commit()
     except Exception as e:
@@ -787,6 +793,80 @@ def update_leave(leave_id):
         db.session.add(n)
         db.session.commit()
 
+    return jsonify({"success": True})
+
+# ── INVENTORY PIPELINE ──
+@app.route('/api/inventory', methods=['GET'])
+@login_required
+def get_inventory():
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    inv = Ingredient.query.all()
+    return jsonify([{
+        "id": i.id, "name": i.name, "quantity": i.quantity,
+        "unit": i.unit, "min_stock": i.min_stock, "last_updated": i.last_updated.strftime('%Y-%m-%d %H:%M')
+    } for i in inv])
+
+@app.route('/api/inventory/add', methods=['POST'])
+@login_required
+def add_inventory():
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    data = request.json
+    ing = Ingredient(
+        name=data.get('name'),
+        quantity=float(data.get('quantity', 0)),
+        unit=data.get('unit'),
+        min_stock=float(data.get('min_stock', 10.0))
+    )
+    db.session.add(ing)
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route('/api/inventory/<int:ing_id>/update', methods=['POST'])
+@login_required
+def update_inventory(ing_id):
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    ing = Ingredient.query.get(ing_id)
+    if not ing:
+        return jsonify({"error": "Not Found"}), 404
+    data = request.json
+    if 'quantity' in data:
+        ing.quantity = float(data['quantity'])
+    if 'min_stock' in data:
+        ing.min_stock = float(data['min_stock'])
+    db.session.commit()
+    return jsonify({"success": True})
+
+# ── FEEDBACK PIPELINE ──
+@app.route('/api/feedback', methods=['POST'])
+@login_required
+def submit_feedback():
+    if current_user.role != 'student':
+        return jsonify({"error": "Unauthorized"}), 403
+    data = request.json
+    fb = Feedback(
+        student_id=current_user.student_id,
+        menu_id=data.get('menu_id'),
+        rating=data.get('rating'),
+        comments=data.get('comments', '')
+    )
+    db.session.add(fb)
+    db.session.commit()
+    return jsonify({"success": True})
+
+# ── KITCHEN STATUS PIPELINE ──
+@app.route('/api/menu/<int:menu_id>/status', methods=['POST'])
+@login_required
+def update_kitchen_status(menu_id):
+    if current_user.role != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+    m = MenuEntry.query.get(menu_id)
+    if not m:
+        return jsonify({"error": "Not found"}), 404
+    m.kitchen_status = request.json.get('kitchen_status', m.kitchen_status)
+    db.session.commit()
     return jsonify({"success": True})
 
 

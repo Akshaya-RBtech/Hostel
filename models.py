@@ -26,6 +26,7 @@ class MenuEntry(db.Model):
     items = db.Column(db.Text, nullable=False)
     event_type = db.Column(db.String(20), default='Normal')  # Normal, Festival, Holiday
     published = db.Column(db.Boolean, default=True)
+    kitchen_status = db.Column(db.String(50), default='Planned') # Planned, Prep Started, Cooking, Ready, Served
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -118,6 +119,23 @@ class LeaveRequest(db.Model):
     reason = db.Column(db.String(200), nullable=True)
     status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+# ── Inventory & Feedback ──
+class Ingredient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(20), nullable=False) # kg, L, etc
+    min_stock = db.Column(db.Float, default=10.0)
+    last_updated = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(50), nullable=False)
+    menu_id = db.Column(db.Integer, db.ForeignKey('menu_entry.id'), nullable=False)
+    rating = db.Column(db.String(20), nullable=False) # Like, Neutral, Dislike
+    comments = db.Column(db.Text, nullable=True)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 
 class FoodPredictor:

@@ -28,6 +28,9 @@
             <button onclick="switchTab('ops')"      id="tab-ops"       class="dash-tab">
                 <i class="fas fa-cogs"></i> Student Operations
             </button>
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="dash-tab">
+                <i class="fas fa-boxes"></i> Inventory
+            </button>
             <button onclick="switchTab('agent')"    id="tab-agent"     class="dash-tab flex-shrink-0">
                 <i class="fas fa-brain"></i> AI Assistant
             </button>
@@ -115,7 +118,7 @@
                 <div style="overflow-x:auto;">
                     <table class="data-table">
                         <thead>
-                            <tr><th>Date</th><th>Meal</th><th>Dishes</th><th>Event</th><th>Status</th></tr>
+                            <tr><th>Date</th><th>Meal</th><th>Dishes</th><th>Event</th><th>Status (Kitchen)</th></tr>
                         </thead>
                         <tbody>
                             {% for menu in menus[::-1][:10] %}
@@ -124,7 +127,15 @@
                                 <td><span class="badge badge-primary">{{ menu.meal_type }}</span></td>
                                 <td style="color:var(--text-secondary);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ menu.items }}">{{ menu.items }}</td>
                                 <td style="color:var(--text-muted);font-size:12px;">{{ menu.event_type }}</td>
-                                <td><span class="badge badge-success"><i class="fas fa-circle-check" style="margin-right:3px;font-size:9px;"></i>Published</span></td>
+                                <td>
+                                    <select class="form-input" style="font-size:11px;padding:4px;width:110px;" onchange="updateMenuKitchenStatus({{ menu.id }}, this.value)">
+                                        <option value="Planned" {% if menu.kitchen_status == 'Planned' %}selected{% endif %}>Planned</option>
+                                        <option value="Prep Started" {% if menu.kitchen_status == 'Prep Started' %}selected{% endif %}>Prep Started</option>
+                                        <option value="Cooking" {% if menu.kitchen_status == 'Cooking' %}selected{% endif %}>Cooking</option>
+                                        <option value="Ready" {% if menu.kitchen_status == 'Ready' %}selected{% endif %}>Ready</option>
+                                        <option value="Served" {% if menu.kitchen_status == 'Served' %}selected{% endif %}>Served</option>
+                                    </select>
+                                </td>
                             </tr>
                             {% endfor %}
                             {% if not menus %}
@@ -224,6 +235,67 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ============================== TAB X — INVENTORY ============================== -->
+    <div id="content-inventory" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card col-span-1">
+                <div class="card-header">
+                    <div>
+                        <div class="section-title">Add Ingredient</div>
+                        <div class="section-sub">Log new stock into inventory</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form onsubmit="submitInventory(event)">
+                        <div class="form-group">
+                            <label class="form-label">Ingredient Name</label>
+                            <input type="text" id="inv-name" class="form-input" required>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Current Qty</label>
+                                <input type="number" id="inv-qty" class="form-input" min="0" step="0.1" required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Unit</label>
+                                <select id="inv-unit" class="form-input" required>
+                                    <option value="kg">kg</option>
+                                    <option value="L">L</option>
+                                    <option value="pcs">pcs</option>
+                                    <option value="grams">grams</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Min Stock Threshold</label>
+                            <input type="number" id="inv-min" class="form-input" min="0" step="0.1" required value="10.0">
+                        </div>
+                        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Item</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card col-span-1 lg:col-span-2">
+                <div class="card-header">
+                    <div>
+                        <div class="section-title">Current Inventory</div>
+                        <div class="section-sub">Monitor stock levels</div>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Name</th><th>Unit</th><th>Current Stock</th><th>Min Threshold</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="inventory-list">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;">Loading inventory...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     <!-- ============================== TAB 2 — AI PREDICTION ============================== -->
@@ -726,6 +798,7 @@
         if (tab === 'waste') loadWasteAnalytics();
         if (tab === 'comms') fetchAnnouncements();
         if (tab === 'ops') fetchOperationsData();
+        if (tab === 'inventory') fetchInventory();
         if (tab === 'agent') { loadAIInsights(); loadAIReports(); }
     }
 
@@ -1086,6 +1159,70 @@
             body: JSON.stringify({ status: statusStr })
         });
         fetchOperationsData();
+    }
+    
+    // --- INVENTORY LOGIC ---
+    async function fetchInventory() {
+        try {
+            const res = await fetch('/api/inventory');
+            const data = await res.json();
+            const tbody = document.getElementById('inventory-list');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">No inventory found.</td></tr>`;
+            } else {
+                tbody.innerHTML = data.map(i => {
+                    const status = i.quantity <= i.min_stock ? `<span class="badge badge-danger">Low Stock</span>` : `<span class="badge badge-success">OK</span>`;
+                    return `
+                    <tr>
+                        <td style="font-weight:600;">${i.name}</td>
+                        <td style="color:var(--text-secondary);">${i.unit}</td>
+                        <td>
+                            <input type="number" step="0.1" value="${i.quantity}" id="inv-qty-${i.id}" class="form-input" style="width:80px;padding:4px;font-size:11px;">
+                        </td>
+                        <td>
+                            <input type="number" step="0.1" value="${i.min_stock}" id="inv-min-${i.id}" class="form-input" style="width:80px;padding:4px;font-size:11px;">
+                        </td>
+                        <td>${status}</td>
+                        <td><button class="btn-primary" style="font-size:11px;padding:4px 8px;" onclick="updateInventory(${i.id})">Save</button></td>
+                    </tr>`;
+                }).join('');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    
+    async function submitInventory(e) {
+        e.preventDefault();
+        const body = {
+            name: document.getElementById('inv-name').value,
+            quantity: document.getElementById('inv-qty').value,
+            unit: document.getElementById('inv-unit').value,
+            min_stock: document.getElementById('inv-min').value
+        };
+        await fetch('/api/inventory/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        e.target.reset();
+        fetchInventory();
+    }
+
+    async function updateInventory(id) {
+        const body = {
+            quantity: document.getElementById(`inv-qty-${id}`).value,
+            min_stock: document.getElementById(`inv-min-${id}`).value
+        };
+        await fetch(`/api/inventory/${id}/update`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        fetchInventory();
+    }
+    
+    // --- KITCHEN STATUS TRIGGER (FOR MENU VIEW) ---
+    async function updateMenuKitchenStatus(menuId, statusString) {
+        await fetch(`/api/menu/${menuId}/status`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ kitchen_status: statusString })
+        });
+        alert('Kitchen Status Updated');
+        // You'd ideally reload menus here
     }
 
     function getChartColors() {
