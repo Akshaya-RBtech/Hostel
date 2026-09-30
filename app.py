@@ -439,9 +439,15 @@ def admin_dashboard():
     unrecorded_menus = [m for m in menus if m.consumption is None]
     ai_reports = AIReport.query.order_by(AIReport.generated_at.desc()).limit(10).all()
     
+    # Calculate weekly menus for admin
+    today = datetime.now().strftime('%Y-%m-%d')
+    end_of_week = (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
+    weekly_menus = MenuEntry.query.filter(MenuEntry.date >= today, MenuEntry.date <= end_of_week).order_by(MenuEntry.date).all()
+    
     return render_template(
         'admin_dashboard.html',
         menus=menus,
+        weekly_menus=weekly_menus,
         no_votes=no_votes,
         consumption_logs=consumption_logs,
         unrecorded_menus=unrecorded_menus,
@@ -931,12 +937,17 @@ def student_portal():
     tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
     today = datetime.now().strftime('%Y-%m-%d')
     
-    upcoming_menus = MenuEntry.query.filter(MenuEntry.date.in_([today, tomorrow])).all()
+    upcoming_menus = MenuEntry.query.filter(MenuEntry.date.in_([today, tomorrow])).order_by(MenuEntry.date).all()
+    
+    # Get menus for the entire current week (assume starting today + next 6 days)
+    end_of_week = (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
+    weekly_menus = MenuEntry.query.filter(MenuEntry.date >= today, MenuEntry.date <= end_of_week).order_by(MenuEntry.date).all()
     
     my_votes = Vote.query.filter_by(student_id=current_user.student_id).all()
     voted_menu_ids = [v.menu_id for v in my_votes]
+    voted_choices = {v.menu_id: v.choice for v in my_votes}
     
-    return render_template('student_portal.html', menus=upcoming_menus, voted_ids=voted_menu_ids)
+    return render_template('student_portal.html', menus=upcoming_menus, weekly_menus=weekly_menus, voted_ids=voted_menu_ids, voted_choices=voted_choices)
 
 @app.route('/api/menu_stats/<int:menu_id>')
 @login_required

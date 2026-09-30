@@ -2,18 +2,19 @@
 
 {% block content %}
 <div class="fade-in">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-        <div>
-            <h1 style="font-size:22px;font-weight:800;color:var(--text-primary);letter-spacing:-0.4px;">Student Portal</h1>
-            <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">
-                Welcome, <strong style="color:var(--primary);">{{ current_user.username }}</strong> &mdash; View today's menu and cast your meal votes
-            </p>
-        </div>
-        <div class="header-badge">
-            <div class="status-dot"></div>
-            <span style="font-size:11px;font-weight:600;">{{ menus|length }} Active Menus</span>
+    <div style="display:flex;flex-direction:column;margin-bottom:20px;padding:4px 0;">
+        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;" id="current-date-header"></div>
+        <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-top:4px;letter-spacing:-0.5px;">
+            Hi, {{ current_user.username.split()[0] }} 👋
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateOpts = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('current-date-header').innerText = new Date().toLocaleDateString('en-US', dateOpts);
+        });
+    </script>
 
     <!-- ===== HOME TAB ===== -->
     <div id="content-home" class="tab-content block">
@@ -22,17 +23,36 @@
         {% for menu in menus %}
         <div class="card" id="menu-card-{{ menu.id }}" style="overflow:hidden;transition:all 0.2s;">
             <!-- Card Header -->
-            <div style="background:linear-gradient(135deg, var(--primary), var(--primary-dark));padding:16px 20px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <span style="font-size:22px;">
-                        {% if menu.meal_type == 'Breakfast' %}🌅{% elif menu.meal_type == 'Lunch' %}☀️{% elif menu.meal_type == 'Dinner' %}🌙{% else %}🍪{% endif %}
-                    </span>
-                    <span style="font-size:10px;font-weight:700;background:rgba(255,255,255,0.2);color:white;border-radius:100px;padding:4px 10px;text-transform:uppercase;letter-spacing:0.5px;">
-                        {{ menu.event_type }}
-                    </span>
+            <div style="background:var(--card-bg);padding:16px 20px;border-bottom:1px solid var(--border);position:relative;display:flex;align-items:center;gap:16px;">
+                <!-- Circular Food Image Container -->
+                <div style="width:60px;height:60px;border-radius:50%;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
+                    {% if menu.meal_type == 'Breakfast' %}
+                        <img src="https://cdn-icons-png.flaticon.com/512/3014/3014491.png" style="width:40px;height:40px;object-fit:cover;" alt="Breakfast">
+                    {% elif menu.meal_type == 'Lunch' %}
+                        <img src="https://cdn-icons-png.flaticon.com/512/3274/3274099.png" style="width:40px;height:40px;object-fit:cover;" alt="Lunch">
+                    {% elif menu.meal_type == 'Dinner' %}
+                        <img src="https://cdn-icons-png.flaticon.com/512/4780/4780004.png" style="width:40px;height:40px;object-fit:cover;" alt="Dinner">
+                    {% else %}
+                        <img src="https://cdn-icons-png.flaticon.com/512/2674/2674069.png" style="width:40px;height:40px;object-fit:cover;" alt="Snacks">
+                    {% endif %}
                 </div>
-                <div style="font-weight:800;color:white;font-size:17px;letter-spacing:-0.3px;">{{ menu.meal_type }}</div>
-                <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:3px;">📅 {{ menu.date }}</div>
+                
+                <div style="flex:1;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <span style="font-weight:800;color:var(--text-primary);font-size:18px;letter-spacing:-0.2px;">{{ menu.meal_type }}</span>
+                        <span style="font-size:10px;font-weight:700;background:rgba(16,185,129,0.15);color:var(--success);border-radius:100px;padding:4px 10px;text-transform:uppercase;letter-spacing:0.5px;">
+                            {{ menu.event_type }}
+                        </span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;display:flex;align-items:center;gap:5px;">
+                        <i class="far fa-clock" style="color:var(--primary);"></i>
+                        {% if menu.meal_type == 'Breakfast' %}07:30 AM - 09:30 AM
+                        {% elif menu.meal_type == 'Lunch' %}12:30 PM - 02:30 PM
+                        {% elif menu.meal_type == 'Snacks' %}05:00 PM - 06:00 PM
+                        {% elif menu.meal_type == 'Dinner' %}07:30 PM - 09:30 PM
+                        {% else %}12:00 PM{% endif %}
+                    </div>
+                </div>
             </div>
 
             <!-- Card Body -->
@@ -76,12 +96,12 @@
                     <div style="display:flex;gap:8px;margin-bottom:10px;">
                         <button type="button" onclick="selectVote({{ menu.id }}, 'Yes')"
                             id="btn-yes-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(16,185,129,0.5);background:white;color:var(--success);transition:all 0.2s;font-family:'Inter',sans-serif;">
+                            style="flex:1;padding:10px;border-radius:100px;font-weight:700;font-size:13px;cursor:pointer;border:none;background:var(--success);color:white;transition:all 0.2s;font-family:'Inter',sans-serif;">
                             <i class="fas fa-check-circle" style="margin-right:6px;"></i>Coming
                         </button>
                         <button type="button" onclick="selectVote({{ menu.id }}, 'No')"
                             id="btn-no-{{ menu.id }}"
-                            style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid rgba(239,68,68,0.5);background:white;color:var(--danger);transition:all 0.2s;font-family:'Inter',sans-serif;">
+                            style="flex:1;padding:10px;border-radius:100px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.05);color:var(--danger);transition:all 0.2s;font-family:'Inter',sans-serif;">
                             <i class="fas fa-times-circle" style="margin-right:6px;"></i>Not Coming
                         </button>
                     </div>
@@ -90,13 +110,24 @@
 
                     <div id="reason-box-{{ menu.id }}" style="display:none;margin-bottom:10px;">
                         <div style="font-size:11px;font-weight:600;margin-bottom:6px;color:var(--text-secondary);">If Not Coming, please select reason:</div>
-                        <select class="form-input" id="reason-select-{{ menu.id }}" style="width:100%;font-size:13px;margin-bottom:6px;" onchange="toggleOtherReason({{ menu.id }})">
-                            <option value="">Select Reason...</option>
-                            <option value="Don't like the menu">Don't like the menu</option>
-                            <option value="Going outside">Going outside</option>
-                            <option value="Sick">Sick</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Don't like the menu" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                                Don't like the menu
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Going outside" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                                Going outside
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Sick" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                                Sick
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-primary);cursor:pointer;">
+                                <input type="radio" name="reason_radio_{{ menu.id }}" value="Other" onchange="toggleOtherReason({{ menu.id }}, this.value)">
+                                Other
+                            </label>
+                        </div>
                         <input type="hidden" name="reason" id="reason-{{ menu.id }}">
                         <textarea id="reason-other-{{ menu.id }}" rows="2" class="form-input"
                             placeholder="Enter custom reason..." style="display:none;width:100%;font-size:13px;" oninput="updateReasonField({{ menu.id }})"></textarea>
@@ -124,14 +155,62 @@
 
     <!-- ===== CALENDAR TAB ===== -->
     <div id="content-calendar" class="tab-content" style="display:none;">
-        <div class="card" style="padding:20px;">
-            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">
-                <i class="fas fa-calendar-week" style="color:var(--primary);margin-right:8px;"></i> Weekly Meal Calendar
-            </h3>
-            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Active published menus for the week. Complete your confirmations here.</p>
-            <div style="display:flex;gap:10px;overflow-x:auto;">
-                <!-- Just redirect to home for actual voting since this wraps the same logic structurally -->
-                <button onclick="activateTab('home')" class="btn-primary" style="font-size:12px;">Go to active confirmations</button>
+        <div class="card" style="padding:0;border-radius:16px;background:var(--card-bg);overflow:hidden;">
+            <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:18px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-calendar-week" style="color:var(--primary);"></i> Weekly Meal Calendar
+                </h3>
+            </div>
+            
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:700px;font-size:13px;text-align:left;">
+                    <thead style="background:rgba(0,0,0,0.02);">
+                        <tr>
+                            <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Day</th>
+                            <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Breakfast</th>
+                            <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Lunch</th>
+                            <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Snacks</th>
+                            <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Dinner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for date, items in weekly_menus | groupby('date') %}
+                            <tr style="border-bottom:1px solid var(--border);transition:all 0.2s;">
+                                <td style="padding:16px 20px;vertical-align:top;font-weight:700;color:var(--text-primary);">
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(16,185,129,0.1);color:var(--success);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                                            <span style="font-size:10px;text-transform:uppercase;font-weight:800;">Day</span>
+                                            <span style="font-size:14px;letter-spacing:-0.5px;">{{ date[-2:] }}</span>
+                                        </div>
+                                        <div style="font-size:12px;color:var(--text-secondary);font-weight:600;">{{ date }}</div>
+                                    </div>
+                                </td>
+                                {% for meal in ['Breakfast', 'Lunch', 'Snacks', 'Dinner'] %}
+                                    {% set m = items | selectattr('meal_type', 'equalto', meal) | first %}
+                                    <td style="padding:16px 20px;vertical-align:top;color:var(--text-primary);">
+                                        {% if m %}
+                                            <div style="font-weight:500;margin-bottom:8px;line-height:1.4;">{{ m.items }}</div>
+                                            {% if m.id in voted_ids %}
+                                                {% if voted_choices.get(m.id) == 'Yes' %}
+                                                    <span style="display:inline-block;padding:4px 8px;font-size:10px;font-weight:700;color:var(--success);background:rgba(16,185,129,0.1);border-radius:100px;">Coming</span>
+                                                {% else %}
+                                                    <span style="display:inline-block;padding:4px 8px;font-size:10px;font-weight:700;color:var(--danger);background:rgba(239,68,68,0.1);border-radius:100px;">Not Coming</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <button onclick="switchDashboardTab(event, 'home')" style="font-size:10px;padding:4px 8px;border-radius:100px;font-weight:600;border:1px dashed var(--primary);color:var(--primary);background:none;cursor:pointer;">Pending</button>
+                                            {% endif %}
+                                        {% else %}
+                                            <span style="color:var(--text-muted);font-style:italic;font-size:11px;">-</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if not weekly_menus %}
+                <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">No menus mapped for this week.</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -310,21 +389,30 @@
 
         // Reset styling
         btnYes.style.background = 'white';
+        btnYes.style.color = 'var(--success)';
+        btnYes.style.border = '1px solid rgba(16,185,129,0.4)';
+        
         btnNo.style.background = 'white';
+        btnNo.style.color = 'var(--danger)';
+        btnNo.style.border = '1px solid rgba(239,68,68,0.4)';
 
         if (choice === 'Yes') {
-            btnYes.style.background = 'rgba(16,185,129,0.1)';
+            btnYes.style.background = 'var(--success)';
+            btnYes.style.color = 'white';
+            btnYes.style.border = 'none';
             reasonBox.style.display = 'none';
             // Clear reason
             document.getElementById('reason-' + menuId).value = '';
-            document.getElementById('reason-select-' + menuId).value = '';
+            document.querySelectorAll(`input[name="reason_radio_${menuId}"]`).forEach(r => r.checked = false);
             document.getElementById('reason-other-' + menuId).style.display = 'none';
-            submitBtn.innerText = '✅ Submit Vote';
+            submitBtn.innerText = 'Submit';
             submitBtn.style.display = 'block';
         } else if (choice === 'No') {
-            btnNo.style.background = 'rgba(239,68,68,0.1)';
+            btnNo.style.background = 'var(--danger)';
+            btnNo.style.color = 'white';
+            btnNo.style.border = 'none';
             reasonBox.style.display = 'block';
-            submitBtn.innerText = 'I Will Skip';
+            submitBtn.innerText = 'Submit';
             submitBtn.style.display = 'block';
         }
     }

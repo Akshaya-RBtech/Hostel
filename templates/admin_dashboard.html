@@ -4,13 +4,27 @@
 <div class="fade-in">
 
     <!-- ===== PAGE HEADER ===== -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
-        <div>
-            <h1 style="font-size:24px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px;">Admin Dashboard</h1>
-            <p style="font-size:13px;color:var(--text-secondary);margin-top:3px;">AI-powered food waste management &amp; analytics platform</p>
+    <div style="display:flex;flex-direction:column;margin-bottom:28px;padding:4px 0;">
+        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;" id="admin-date-header"></div>
+        <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-top:4px;letter-spacing:-0.5px;">
+            Good Morning, {{ current_user.username.split()[0] }}!
         </div>
-            <!-- Tabs are now managed by the sidebar in layout.html -->
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateOpts = { weekday: 'long', month: 'short', day: 'numeric' };
+            const el = document.getElementById('admin-date-header');
+            if (el) el.innerText = new Date().toLocaleDateString('en-US', dateOpts);
+            
+            const hours = new Date().getHours();
+            let greeting = 'Good Morning';
+            if(hours >= 12 && hours < 17) greeting = 'Good Afternoon';
+            else if(hours >= 17) greeting = 'Good Evening';
+            
+            const titleEl = el.nextElementSibling;
+            if(titleEl) titleEl.innerText = `${greeting}, {{ current_user.username.split()[0] }} 👋`;
+        });
+    </script>
 
     <style>
         .dash-tab {
@@ -84,37 +98,54 @@
             <!-- Published menus table -->
             <div class="card col-span-1 lg:col-span-2">
                 <div class="card-header">
-                    <div>
-                        <div class="section-title">Recently Published Menus</div>
-                        <div class="section-sub">Last 10 entries across all meal types</div>
+                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                        <div>
+                            <div class="section-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:6px;"></i> Weekly Menu</div>
+                            <div class="section-sub">Manage currently published menus for this week</div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;"><i class="fas fa-save" style="margin-right:4px;"></i> Save Draft</button>
+                            <button class="btn-primary" style="font-size:12px;padding:6px 12px;background:var(--success);border-color:var(--success);"><i class="fas fa-cloud-arrow-up" style="margin-right:4px;"></i> Publish</button>
+                        </div>
                     </div>
-                    <span class="badge badge-success"><i class="fas fa-check-circle" style="margin-right:4px;"></i>Live</span>
                 </div>
                 <div style="overflow-x:auto;">
                     <table class="data-table">
-                        <thead>
-                            <tr><th>Date</th><th>Meal</th><th>Dishes</th><th>Event</th><th>Status (Kitchen)</th></tr>
+                        <thead style="background:rgba(0,0,0,0.02);">
+                            <tr>
+                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Day</th>
+                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Breakfast</th>
+                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Lunch</th>
+                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Snacks</th>
+                                <th style="padding:14px 20px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;">Dinner</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            {% for menu in menus[::-1][:10] %}
-                            <tr>
-                                <td style="font-weight:600;">{{ menu.date }}</td>
-                                <td><span class="badge badge-primary">{{ menu.meal_type }}</span></td>
-                                <td style="color:var(--text-secondary);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ menu.items }}">{{ menu.items }}</td>
-                                <td style="color:var(--text-muted);font-size:12px;">{{ menu.event_type }}</td>
-                                <td>
-                                    <select class="form-input" style="font-size:11px;padding:4px;width:110px;" onchange="updateMenuKitchenStatus({{ menu.id }}, this.value)">
-                                        <option value="Planned" {% if menu.kitchen_status == 'Planned' %}selected{% endif %}>Planned</option>
-                                        <option value="Prep Started" {% if menu.kitchen_status == 'Prep Started' %}selected{% endif %}>Prep Started</option>
-                                        <option value="Cooking" {% if menu.kitchen_status == 'Cooking' %}selected{% endif %}>Cooking</option>
-                                        <option value="Ready" {% if menu.kitchen_status == 'Ready' %}selected{% endif %}>Ready</option>
-                                        <option value="Served" {% if menu.kitchen_status == 'Served' %}selected{% endif %}>Served</option>
-                                    </select>
+                            {% for date, items in weekly_menus | groupby('date') %}
+                            <tr style="border-bottom:1px solid var(--border);transition:all 0.2s;">
+                                <td style="padding:16px 20px;vertical-align:top;font-weight:700;color:var(--text-primary);">
+                                    <div style="display:flex;flex-direction:column;">
+                                        <span style="font-size:11px;text-transform:uppercase;color:var(--text-secondary);">Day</span>
+                                        <span style="font-size:13px;letter-spacing:-0.5px;">{{ date }}</span>
+                                    </div>
                                 </td>
+                                {% for meal in ['Breakfast', 'Lunch', 'Snacks', 'Dinner'] %}
+                                    {% set m = items | selectattr('meal_type', 'equalto', meal) | first %}
+                                    <td style="padding:16px 20px;vertical-align:top;color:var(--text-primary);">
+                                        {% if m %}
+                                            <div style="font-weight:500;font-size:12px;margin-bottom:8px;line-height:1.4;color:var(--text-primary);">{{ m.items }}</div>
+                                            <div style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
+                                                <i class="fas fa-utensils"></i> {{ m.kitchen_status or 'Planned' }}
+                                            </div>
+                                        {% else %}
+                                            <span style="color:var(--text-muted);font-style:italic;font-size:11px;">-</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
                             </tr>
                             {% endfor %}
-                            {% if not menus %}
-                            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No menus published yet.</td></tr>
+                            {% if not weekly_menus %}
+                            <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No menus mapped for this week.</td></tr>
                             {% endif %}
                         </tbody>
                     </table>

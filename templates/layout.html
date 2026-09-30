@@ -924,7 +924,7 @@
                 {% endif %}
                 
                 <div class="header-right">
-                    {% if current_user.is_authenticated and current_user.role == 'student' %}
+                    {% if current_user.is_authenticated %}
                     <!-- Notification Bell -->
                     <div class="theme-dropdown-container" id="notif-container">
                         <button class="theme-dropdown-btn" id="notif-toggle-btn" onclick="toggleNotifMenu()" aria-label="Notifications" style="position:relative;padding:8px;border-radius:50%;border:none;background:rgba(16,185,129,0.1);">
@@ -1003,9 +1003,9 @@
                     <i class="fas fa-calendar-week"></i>
                     <span>Calendar</span>
                 </a>
-                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'complaints')">
-                    <i class="fas fa-flag"></i>
-                    <span>Report</span>
+                <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'settings')">
+                    <i class="fas fa-gear"></i>
+                    <span>Settings</span>
                 </a>
                 <a class="bottom-nav-item" onclick="switchDashboardTab(event, 'agent')">
                     <i class="fas fa-robot"></i>
