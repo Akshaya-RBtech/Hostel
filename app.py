@@ -917,17 +917,27 @@ def menu_stats(menu_id):
 @app.route('/student/vote', methods=['POST'])
 @login_required
 def vote():
-    menu_id = request.form.get('menu_id')
-    choice = request.form.get('choice')
-    reason = request.form.get('reason', '')
+    if request.is_json:
+        data = request.json
+        menu_id = data.get('menu_id')
+        choice = data.get('choice')
+        reason = data.get('reason', '')
+    else:
+        menu_id = request.form.get('menu_id')
+        choice = request.form.get('choice')
+        reason = request.form.get('reason', '')
     
     existing_vote = Vote.query.filter_by(student_id=current_user.student_id, menu_id=menu_id).first()
     if existing_vote:
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'You have already voted for this meal.'}), 400
         flash('You have already voted for this meal.')
     else:
         vote = Vote(student_id=current_user.student_id, menu_id=menu_id, choice=choice, reason=reason)
         db.session.add(vote)
         db.session.commit()
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Vote submitted!'})
         flash('Vote submitted!')
     
     return redirect(url_for('student_portal'))

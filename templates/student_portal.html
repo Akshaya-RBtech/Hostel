@@ -61,7 +61,14 @@
                     <div id="fb-status-{{ menu.id }}" style="margin-top:6px;font-size:11px;display:none;font-weight:600;"></div>
                 </div>
                 {% else %}
-                <form action="{{ url_for('vote') }}" method="POST" id="vote-form-{{ menu.id }}">
+                <div id="vote-success-{{ menu.id }}" style="display:none;text-align:center;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:center;align-items:center;gap:8px;">
+                        <i class="fas fa-circle-check" style="color:var(--success);font-size:18px;"></i>
+                        <span style="color:var(--success);font-weight:700;font-size:13px;">Vote Submitted!</span>
+                    </div>
+                </div>
+                <div id="vote-error-{{ menu.id }}" style="display:none;color:var(--danger);font-size:11px;font-weight:600;margin-bottom:6px;text-align:center;"></div>
+                <form onsubmit="submitVoteAjax(event, {{ menu.id }})" id="vote-form-{{ menu.id }}">
                     <input type="hidden" name="menu_id" value="{{ menu.id }}">
 
                     <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -302,9 +309,6 @@
             container.innerHTML += `
                 <div style="display:flex;align-items:flex-start;gap:8px;">
                     <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-size:10px;flex-shrink:0;"><i class="fas fa-robot"></i></div>
-            container.innerHTML += `
-                <div style="display:flex;align-items:flex-start;gap:8px;">
-                    <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-size:10px;flex-shrink:0;"><i class="fas fa-robot"></i></div>
                     <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:0 12px 12px 12px;padding:10px 14px;font-size:12px;color:var(--danger);">Sorry, I couldn't connect. Try again in a moment.</div>
                 </div>`;
         }
@@ -392,6 +396,41 @@
         }
         btn.disabled = false;
         setTimeout(() => st.style.display='none', 4000);
+    }
+    
+    async function submitVoteAjax(e, menuId) {
+        e.preventDefault();
+        const choice = document.getElementById('choice-' + menuId).value;
+        const reason = document.getElementById('reason-' + menuId).value;
+        const btn = document.getElementById('submit-btn-' + menuId);
+        const err = document.getElementById('vote-error-' + menuId);
+        
+        if (choice === 'No' && !reason) {
+            err.style.display = 'block';
+            err.innerText = "Please provide a reason for skipping.";
+            return;
+        }
+        
+        btn.disabled = true;
+        try {
+            const res = await fetch('/student/vote', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({menu_id: menuId, choice: choice, reason: reason})
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('vote-form-' + menuId).style.display = 'none';
+                document.getElementById('vote-success-' + menuId).style.display = 'block';
+            } else {
+                err.style.display = 'block';
+                err.innerText = data.error || 'Failed to submit vote.';
+            }
+        } catch (e) {
+            err.style.display = 'block';
+            err.innerText = 'Network error.';
+        }
+        btn.disabled = false;
     }
 </script>
 {% endblock %}
