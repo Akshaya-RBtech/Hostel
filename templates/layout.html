@@ -941,28 +941,29 @@
                     </div>
                     <div class="drawer-links">
                         {% if current_user.is_authenticated and current_user.role == 'admin' %}
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-utensils"></i> Menu Management</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-calendar-week"></i> Weekly Meal Calendar</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-users-viewfinder"></i> Attendance Tracker</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-brain"></i> AI Meal Assistant</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-recycle"></i> Menu Repetition Detector</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-chart-line"></i> Dish Analytics</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-leaf"></i> Food Waste Tracking</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-box"></i> Inventory Stock</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-envelope-open-text"></i> Leave Requests</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-exclamation-triangle"></i> Complaints</a>
-                        <a href="{{ url_for('admin_dashboard') }}" class="drawer-link"><i class="fas fa-bullhorn"></i> Communications</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=menu" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-utensils"></i> Menu Management</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=menu" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-calendar-week"></i> Weekly Meal Calendar</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-users-viewfinder"></i> Attendance Tracker</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=ai" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-brain"></i> AI Meal Assistant</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=ai" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-recycle"></i> Menu Repetition Detector</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-chart-line"></i> Dish Analytics</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-leaf"></i> Food Waste Tracking</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-box"></i> Inventory Stock</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=comms" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-envelope-open-text"></i> Leave Requests</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=comms" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-exclamation-triangle"></i> Complaints</a>
+                        <a href="{{ url_for('admin_dashboard') }}?tab=comms" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-bullhorn"></i> Communications</a>
+                        <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;margin-top:24px;border-top:1px solid #f1f5f9;border-radius:0;"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> Logout</a>
                         <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;margin-top:24px;border-top:1px solid #f1f5f9;border-radius:0;"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> Logout</a>
 
                         {% elif current_user.is_authenticated and current_user.role == 'student' %}
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-home"></i> Home Dashboard</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-calendar-alt"></i> Weekly Schedule</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-check-circle"></i> Meal Attendance</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-comment-dots"></i> Student AI Assistant</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-envelope-open"></i> Leave Request</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-exclamation-circle"></i> Submit Complaint</a>
-                        <a href="{{ url_for('student_portal') }}" class="drawer-link"><i class="fas fa-cog"></i> Profile & Settings</a>
+                        <a href="{{ url_for('student_portal') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-home"></i> Home Dashboard</a>
+                        <a href="{{ url_for('student_portal') }}?tab=menu" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-calendar-alt"></i> Weekly Schedule</a>
+                        <a href="{{ url_for('student_portal') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-check-circle"></i> Meal Attendance</a>
+                        <a href="{{ url_for('student_portal') }}?tab=ai" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-comment-dots"></i> Student AI Assistant</a>
+                        <a href="{{ url_for('student_portal') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-envelope-open"></i> Leave Request</a>
+                        <a href="{{ url_for('student_portal') }}?tab=dashboard" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-exclamation-circle"></i> Submit Complaint</a>
+                        <a href="{{ url_for('student_portal') }}?tab=settings" class="drawer-link" onclick="closeDrawer()"><i class="fas fa-cog"></i> Profile & Settings</a>
                         <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;margin-top:24px;border-top:1px solid #f1f5f9;border-radius:0;"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> Logout</a>
                         
                         {% else %}
@@ -1232,16 +1233,61 @@
         const overlay = document.getElementById('mobile-drawer-overlay');
         const drawer = document.getElementById('mobile-drawer');
         
+        function closeDrawer() {
+            if(drawer) drawer.classList.remove('open');
+            if(overlay) overlay.classList.remove('open');
+        }
+
         if(menuBtn) {
             menuBtn.addEventListener('click', () => {
                 drawer.classList.add('open');
                 overlay.classList.add('open');
             });
-            overlay.addEventListener('click', () => {
-                drawer.classList.remove('open');
-                overlay.classList.remove('open');
-            });
+            overlay.addEventListener('click', closeDrawer);
         }
+
+        // Global Tab Switching Logic for Drawer deep links
+        window.addEventListener('DOMContentLoaded', () => {
+            const tabParam = new URLSearchParams(window.location.search).get('tab');
+            if (tabParam) {
+                // Find all tab contents
+                const allTabs = document.querySelectorAll('.tab-content');
+                if (allTabs.length > 0) {
+                    allTabs.forEach(t => {
+                        t.style.display = 'none';
+                        t.classList.remove('block');
+                    });
+                    
+                    const targetTab = document.getElementById('content-' + tabParam);
+                    if (targetTab) {
+                        targetTab.style.display = 'block';
+                        targetTab.classList.add('block');
+                    } else {
+                        // fallback to first tab if not found
+                        allTabs[0].style.display = 'block';
+                        allTabs[0].classList.add('block');
+                    }
+                }
+            } else {
+                // If no tab specified, just ensure only the first active one shows
+                const allTabs = document.querySelectorAll('.tab-content');
+                if (allTabs.length > 0) {
+                    let hasVisible = false;
+                    allTabs.forEach(t => {
+                        if (t.classList.contains('block') && !hasVisible) {
+                            hasVisible = true;
+                        } else {
+                            t.style.display = 'none';
+                            t.classList.remove('block');
+                        }
+                    });
+                    if(!hasVisible) {
+                        allTabs[0].style.display = 'block';
+                        allTabs[0].classList.add('block');
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

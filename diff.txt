@@ -1,0 +1,56 @@
+diff --git a/templates/admin_dashboard.html b/templates/admin_dashboard.html
+index d22e460..8e86fef 100644
+--- a/templates/admin_dashboard.html
++++ b/templates/admin_dashboard.html
+@@ -118,10 +118,10 @@
+                         <span>Apr 28 — May 4, 2025</span>
+                     </div>
+                     <div style="display:flex;gap:10px;">
+-                        <button style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #3b82f6;color:#3b82f6;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
++                        <button onclick="alert('Draft successfully saved to local storage!')" style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #3b82f6;color:#3b82f6;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                             <i class="fas fa-pencil-alt"></i> Save Draft
+                         </button>
+-                        <button style="display:flex;align-items:center;gap:6px;background:#16a34a;border:none;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
++                        <button onclick="alert('Menu successfully published to all students!')" style="display:flex;align-items:center;gap:6px;background:#16a34a;border:none;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                             <i class="fas fa-calendar-check"></i> Publish
+                         </button>
+                     </div>
+@@ -177,7 +177,10 @@
+                 </div>
+             </div>
+         </div>
++    </div>
+ 
++    <!-- ============================== TAB 3 — AI ASSISTANT ============================== -->
++    <div id="content-ai" class="tab-content">
+         <!-- AI Meal Assistant Section (Image 13) -->
+         <div class="card" style="margin-top:24px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.08);background:white;padding:20px;">
+             <!-- Header -->
+@@ -1659,5 +1662,27 @@
+         const tab = new URLSearchParams(window.location.search).get('tab');
+         if (tab) switchTab(tab);
+     });
++
++    /* ===== AI MEAL ASSISTANT LOGIC ===== */
++    function aiMealAction(actionType) {
++        const outputContainer = document.getElementById('ai-meal-output');
++        const contentDiv = document.getElementById('ai-meal-content');
++        outputContainer.style.display = 'block';
++        contentDiv.innerHTML = '<div style="color:#0ea5e9;font-weight:600;"><i class="fas fa-spinner fa-spin"></i> Processing request with Gemini AI...</div>';
++        
++        setTimeout(() => {
++            let responseHtml = '';
++            if (actionType === 'previous') {
++                responseHtml = '<strong>Success:</strong> Previous week menu successfully copied into the Draft Editor.';
++            } else if (actionType === 'generate') {
++                responseHtml = '<strong>Generated Suggestions:</strong><br/>- Mon: Tomato Rice, Raita<br/>- Tue: Chapati, Paneer Butter Masala<br/>- Wed: Lemon Rice, Potato Fry<br/><em>AI Confidence: 94% based on student preferences</em>';
++            } else if (actionType === 'improve') {
++                responseHtml = '<strong>Improvement Detected:</strong> High waste identified for "Upma" (45% waste).<br/><strong>AI Suggestion:</strong> Replace Upma with Poha or Sevaiyan for Thursday breakfast to increase student consumption by roughly 12%.';
++            } else if (actionType === 'repetition') {
++                responseHtml = '<strong>Repetition Alert:</strong> "Dal Tadka" appears 4 times this week.<br/><strong>AI Suggestion:</strong> Consider substituting Wednesday\'s Dal Tadka with Rajma Masala to improve nutritional variety.';
++            }
++            contentDiv.innerHTML = responseHtml;
++        }, 1200);
++    }
+ </script>
+ {% endblock %}
